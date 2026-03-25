@@ -11,13 +11,15 @@ public class BattleManager : MonoBehaviour
         public int hp;
         public int attack;
         public int exp;
+        public int gold;
 
-        public Enemy(string name, int hp, int attack, int exp)
+        public Enemy(string name, int hp, int attack, int exp, int gold)
         {
             this.name = name;
             this.hp = hp;
             this.attack = attack;
             this.exp = exp;
+            this.gold = gold;
         }
     }
 
@@ -27,6 +29,7 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private TMP_Text enemyHpText;
     [SerializeField] private TMP_Text levelText;
     [SerializeField] private TMP_Text expText;
+    [SerializeField] private TMP_Text potionText;
 
     private int playerHp;
     private int playerAttack;
@@ -57,9 +60,9 @@ public class BattleManager : MonoBehaviour
 
         var enemies = new Enemy[]
         {
-        new Enemy("スライム", 10, 2, 3),
-        new Enemy("ゴブリン", 15, 3, 5),
-        new Enemy("オオカミ", 12, 4, 4)
+            new Enemy("スライム", 10, 2, 3, 2),
+            new Enemy("ゴブリン", 18, 4, 6, 5),
+            new Enemy("オオカミ", 12, 6, 5, 4),
         };
 
         currentEnemy = enemies[Random.Range(0, enemies.Length)];
@@ -106,23 +109,29 @@ public class BattleManager : MonoBehaviour
         }
 
         RefreshUI();
-        messageText.text = $"{currentEnemy.name}に{playerAttack}ダメージ！\n{currentEnemy.name}の反撃！ {enemyAttack}ダメージ受けた！";
+        // messageText.text = $"{currentEnemy.name}に{playerAttack}ダメージ！\n{currentEnemy.name}の反撃！ {enemyAttack}ダメージ受けた！";
+        if (!battleEnded)
+        {
+            messageText.text = $"{currentEnemy.name}に{playerAttack}ダメージ！\n" + $"{currentEnemy.name}の反撃！{enemyAttack}ダメージ！";
+        }
+
     }
 
     private void WinBattle()
     {
         battleEnded = true;
 
+        messageText.text = $"{currentEnemy.name}を倒した！\n{currentEnemy.exp}経験値と{currentEnemy.gold}Gを手に入れた！";
+
         if (GameManager.Instance != null)
         {
             GameManager.Instance.playerHp = playerHp;
             GameManager.Instance.playerExp += currentEnemy.exp;
-
+            GameManager.Instance.playerGold += currentEnemy.gold;
             CheckLevelUp();
         }
 
-        messageText.text = $"{currentEnemy.name}を倒した！\n{currentEnemy.exp}経験値を手に入れた！";
-        Invoke(nameof(ReturnToDungeon), 1.5f);
+        Invoke(nameof(ReturnToDungeon), 2.5f);
     }
 
     private void CheckLevelUp()
@@ -133,13 +142,19 @@ public class BattleManager : MonoBehaviour
         {
             GameManager.Instance.playerExp -= GameManager.Instance.nextExp;
             GameManager.Instance.playerLevel += 1;
+
+            int hpUp = 5;
+            int atkUp = 1;
+
             GameManager.Instance.nextExp += 5;
-            GameManager.Instance.maxHp += 5;
-            GameManager.Instance.playerAttack += 1;
+            GameManager.Instance.maxHp += hpUp;
+            GameManager.Instance.playerAttack += atkUp;
             GameManager.Instance.playerHp = GameManager.Instance.maxHp;
 
-            Debug.Log("レベルアップ！");
-            messageText.text += $"\nレベルアップ！ Lv{GameManager.Instance.playerLevel}になった！";
+            messageText.text +=
+                $"\nレベルアップ！" +
+                $"\nHP +{hpUp}" +
+                $"\n攻撃 +{atkUp}";
         }
     }
 
@@ -156,6 +171,46 @@ public class BattleManager : MonoBehaviour
         }
     }
 
+    public void Heal()
+    {
+        if (battleEnded) return;
+
+        if (GameManager.Instance != null && GameManager.Instance.potionCount > 0)
+        {
+            int healAmount = 10;
+
+            playerHp += healAmount;
+            if (playerHp > GameManager.Instance.maxHp)
+            {
+                playerHp = GameManager.Instance.maxHp;
+            }
+
+            GameManager.Instance.potionCount--;
+
+            messageText.text = $"ポーション使用！{healAmount}回復した！";
+
+            // 敵の反撃
+            playerHp -= enemyAttack;
+            messageText.text += $"\n{currentEnemy.name}の反撃！{enemyAttack}ダメージ！";
+
+
+            if (playerHp <= 0)
+            {
+                playerHp = 0;
+                battleEnded = true;
+                messageText.text += "\nやられてしまった…";
+                Invoke(nameof(ReturnToDungeon), 1.5f);
+                return;
+            }
+
+            RefreshUI();
+        }
+        else
+        {
+            messageText.text = "ポーションがない！";
+        }
+    }
+
     private void RefreshUI()
     {
         playerHpText.text = $"HP: {playerHp}";
@@ -166,6 +221,7 @@ public class BattleManager : MonoBehaviour
         {
             levelText.text = $"Lv: {GameManager.Instance.playerLevel}";
             expText.text = $"EXP: {GameManager.Instance.playerExp}/{GameManager.Instance.nextExp}";
+            potionText.text = $"Potion: {GameManager.Instance.potionCount}";
         }
     }
 

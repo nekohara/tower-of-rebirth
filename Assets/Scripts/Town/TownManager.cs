@@ -6,6 +6,8 @@ public class TownManager : MonoBehaviour
     [SerializeField] private TMP_Text messageText;
     [SerializeField] private TMP_Text levelText;
     [SerializeField] private TMP_Text hpText;
+    [SerializeField] private TMP_Text goldText;
+    [SerializeField] private int restCost = 5;
 
     private void Start()
     {
@@ -14,17 +16,25 @@ public class TownManager : MonoBehaviour
 
     public void Rest()
     {
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.playerHp = 20;
-        }
+        if (GameManager.Instance == null) return;
 
-        if (messageText != null)
+        if (GameManager.Instance.playerGold >= restCost)
         {
-            messageText.text = "体力が回復した！";
-        }
+            GameManager.Instance.playerGold -= restCost;
+            GameManager.Instance.playerHp = GameManager.Instance.maxHp;
 
-        Debug.Log("HP回復");
+            if (messageText != null)
+            {
+                messageText.text = $"{restCost}G払って休んだ。体力が回復した！";
+            }
+        }
+        else
+        {
+            if (messageText != null)
+            {
+                messageText.text = "お金が足りない…";
+            }
+        }
 
         RefreshUI();
     }
@@ -36,5 +46,6 @@ public class TownManager : MonoBehaviour
         levelText.text = $"Lv: {GameManager.Instance.playerLevel}";
         hpText.text = $"HP: {GameManager.Instance.playerHp}/{GameManager.Instance.maxHp}";
         hpText.color = GameManager.Instance.playerHp < 10 ? Color.red : Color.white;
+        goldText.text = $"Gold: {GameManager.Instance.playerGold}";
     }
 }
