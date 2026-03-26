@@ -8,6 +8,8 @@ public class TownManager : MonoBehaviour
     [SerializeField] private TMP_Text hpText;
     [SerializeField] private TMP_Text goldText;
     [SerializeField] private int restCost = 5;
+    [SerializeField] private int potionPrice = 5;
+    [SerializeField] private TMP_Text potionText;
 
     private void Start()
     {
@@ -39,6 +41,25 @@ public class TownManager : MonoBehaviour
         RefreshUI();
     }
 
+    public void BuyPotion()
+    {
+        if (GameManager.Instance == null) return;
+
+        if (GameManager.Instance.playerGold >= potionPrice)
+        {
+            GameManager.Instance.playerGold -= potionPrice;
+            GameManager.Instance.potionCount++;
+
+            messageText.text = "ポーションを購入した！";
+        }
+        else
+        {
+            messageText.text = "お金が足りない…";
+        }
+
+        RefreshUI();
+    }
+
     private void RefreshUI()
     {
         if (GameManager.Instance == null) return;
@@ -47,5 +68,6 @@ public class TownManager : MonoBehaviour
         hpText.text = $"HP: {GameManager.Instance.playerHp}/{GameManager.Instance.maxHp}";
         hpText.color = GameManager.Instance.playerHp < 10 ? Color.red : Color.white;
         goldText.text = $"Gold: {GameManager.Instance.playerGold}";
+        potionText.text = $"Potion: {GameManager.Instance.potionCount}";
     }
 }
