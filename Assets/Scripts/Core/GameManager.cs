@@ -12,6 +12,18 @@ public class GameManager : MonoBehaviour
     public int playerHp = 20;
     public int potionCount = 3;
 
+    /// <summary>
+    /// ïêäÌ
+    /// </summary>
+    public string weaponName = "Ç»Çµ";
+    public int weaponPower = 0;
+
+    /// <summary>
+    /// ñhãÔ
+    /// </summary>
+    public string armorName = "Ç»Çµ";
+    public int armorHpBonus = 0;
+
     public Vector3 dungeonPlayerPosition = new Vector3(0f, 0.5f, 0f);
     public Quaternion dungeonPlayerRotation = Quaternion.identity;
 

@@ -7,10 +7,27 @@ public class TownManager : MonoBehaviour
     [SerializeField] private TMP_Text levelText;
     [SerializeField] private TMP_Text hpText;
     [SerializeField] private TMP_Text goldText;
+    [SerializeField] private TMP_Text weaponText;
     [SerializeField] private int restCost = 5;
     [SerializeField] private int potionPrice = 5;
     [SerializeField] private TMP_Text potionText;
+    [SerializeField] private int weaponPrice = 10;
+    [SerializeField] private int weaponPowerValue = 2;
 
+    [SerializeField] private TMP_Text armorText;
+
+    private Armor[] armors =
+    {
+    new Armor("Šv‚ÌŠZ", 12, 5),
+    new Armor("“S‚ÌŠZ", 30, 10)
+};
+
+    private Weapon[] weapons =
+{
+    new Weapon("–Ø‚ÌŒ•", 10, 2),
+    new Weapon("“S‚ÌŒ•", 25, 4),
+    new Weapon("|‚ÌŒ•", 50, 7)
+};
     private void Start()
     {
         RefreshUI();
@@ -23,7 +40,7 @@ public class TownManager : MonoBehaviour
         if (GameManager.Instance.playerGold >= restCost)
         {
             GameManager.Instance.playerGold -= restCost;
-            GameManager.Instance.playerHp = GameManager.Instance.maxHp;
+            GameManager.Instance.playerHp = GetTotalMaxHp();
 
             if (messageText != null)
             {
@@ -60,14 +77,93 @@ public class TownManager : MonoBehaviour
         RefreshUI();
     }
 
+    public void BuyWoodSword()
+    {
+        BuyWeapon(weapons[0]);
+    }
+
+    public void BuyIronSword()
+    {
+        BuyWeapon(weapons[1]);
+    }
+
+
+    public void BuyWeapon(Weapon weapon)
+    {
+        if (GameManager.Instance == null) return;
+
+        if (GameManager.Instance.playerGold >= weapon.price)
+        {
+            GameManager.Instance.playerGold -= weapon.price;
+            GameManager.Instance.weaponPower = weapon.power;
+            GameManager.Instance.weaponName = weapon.name;
+
+            messageText.text = $"{weapon.name}‚ğ‘•”õ‚µ‚½I";
+        }
+        else
+        {
+            messageText.text = "‚¨‹à‚ª‘«‚è‚È‚¢c";
+        }
+
+        RefreshUI();
+    }
+
+    public void BuyLeatherArmor()
+    {
+        BuyArmor(armors[0]);
+    }
+
+    public void BuyIronArmor()
+    {
+        BuyArmor(armors[1]);
+    }
+
+    private void BuyArmor(Armor armor)
+    {
+        if (GameManager.Instance == null) return;
+
+        if (GameManager.Instance.playerGold >= armor.price)
+        {
+            GameManager.Instance.playerGold -= armor.price;
+            GameManager.Instance.armorName = armor.name;
+            GameManager.Instance.armorHpBonus = armor.hpBonus;
+
+            int newMaxHp = GameManager.Instance.playerLevel * 0; // g‚í‚È‚¢‚Ì‚Å–³‹‚µ‚ÄOK
+            int oldMaxHp = GameManager.Instance.maxHp;
+            int totalMaxHp = GetTotalMaxHp();
+
+            // ‘•”õ‚µ‚½uŠÔ‚ÉŒ»İHP‚àãŒÀ“à‚Å’²®
+            if (GameManager.Instance.playerHp > totalMaxHp)
+            {
+                GameManager.Instance.playerHp = totalMaxHp;
+            }
+
+            messageText.text = $"{armor.name}‚ğ‘•”õ‚µ‚½IÅ‘åHPƒAƒbƒvI";
+        }
+        else
+        {
+            messageText.text = "‚¨‹à‚ª‘«‚è‚È‚¢c";
+        }
+
+        RefreshUI();
+    }
+
+    private int GetTotalMaxHp()
+    {
+        if (GameManager.Instance == null) return 20;
+
+        return GameManager.Instance.maxHp + GameManager.Instance.armorHpBonus;
+    }
     private void RefreshUI()
     {
         if (GameManager.Instance == null) return;
 
         levelText.text = $"Lv: {GameManager.Instance.playerLevel}";
-        hpText.text = $"HP: {GameManager.Instance.playerHp}/{GameManager.Instance.maxHp}";
-        hpText.color = GameManager.Instance.playerHp < 10 ? Color.red : Color.white;
+        hpText.text = $"HP: {GameManager.Instance.playerHp}/{GetTotalMaxHp()}";
         goldText.text = $"Gold: {GameManager.Instance.playerGold}";
+        weaponText.text = $"•Ší: {GameManager.Instance.weaponName} (+{GameManager.Instance.weaponPower})";
+        armorText.text = $"–h‹ï: {GameManager.Instance.armorName} (+HP {GameManager.Instance.armorHpBonus})";
         potionText.text = $"Potion: {GameManager.Instance.potionCount}";
     }
+
 }

@@ -30,6 +30,8 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private TMP_Text levelText;
     [SerializeField] private TMP_Text expText;
     [SerializeField] private TMP_Text potionText;
+    [SerializeField] private TMP_Text weaponText;
+    [SerializeField] private TMP_Text armorText;
 
     private int playerHp;
     private int playerAttack;
@@ -57,6 +59,7 @@ public class BattleManager : MonoBehaviour
             playerAttack = 3;
         }
 
+        playerAttack = GameManager.Instance.playerAttack + GameManager.Instance.weaponPower;
 
         var enemies = new Enemy[]
         {
@@ -180,9 +183,9 @@ public class BattleManager : MonoBehaviour
             int healAmount = 10;
 
             playerHp += healAmount;
-            if (playerHp > GameManager.Instance.maxHp)
+            if (playerHp > GetTotalMaxHp())
             {
-                playerHp = GameManager.Instance.maxHp;
+                playerHp = GetTotalMaxHp();
             }
 
             GameManager.Instance.potionCount--;
@@ -213,7 +216,7 @@ public class BattleManager : MonoBehaviour
 
     private void RefreshUI()
     {
-        playerHpText.text = $"HP: {playerHp}";
+        playerHpText.text = $"HP: {playerHp}/{GetTotalMaxHp()}";
         playerHpText.color = playerHp < 10 ? Color.red : Color.white;
         enemyHpText.text = $"{currentEnemy.name} HP: {enemyHp}";
 
@@ -222,7 +225,16 @@ public class BattleManager : MonoBehaviour
             levelText.text = $"Lv: {GameManager.Instance.playerLevel}";
             expText.text = $"EXP: {GameManager.Instance.playerExp}/{GameManager.Instance.nextExp}";
             potionText.text = $"Potion: {GameManager.Instance.potionCount}";
+            weaponText.text = $"•Ší: {GameManager.Instance.weaponName} (+{GameManager.Instance.weaponPower})";
+            armorText.text = $"–h‹ï: {GameManager.Instance.armorName} (+HP {GameManager.Instance.armorHpBonus})";
         }
+    }
+
+    private int GetTotalMaxHp()
+    {
+        if (GameManager.Instance == null) return 20;
+
+        return GameManager.Instance.maxHp + GameManager.Instance.armorHpBonus;
     }
 
     private void ReturnToDungeon()
