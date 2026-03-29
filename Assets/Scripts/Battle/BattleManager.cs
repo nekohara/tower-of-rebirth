@@ -5,6 +5,12 @@ using UnityEngine.SceneManagement;
 
 public class BattleManager : MonoBehaviour
 {
+    private enum EnemyType
+    {
+        Normal,
+        Double
+    }
+
     private class Enemy
     {
         public string name;
@@ -12,14 +18,16 @@ public class BattleManager : MonoBehaviour
         public int attack;
         public int exp;
         public int gold;
+        public EnemyType type;
 
-        public Enemy(string name, int hp, int attack, int exp, int gold)
+        public Enemy(string name, int hp, int attack, int exp, int gold, EnemyType type)
         {
             this.name = name;
             this.hp = hp;
             this.attack = attack;
             this.exp = exp;
             this.gold = gold;
+            this.type = type;
         }
     }
 
@@ -35,50 +43,72 @@ public class BattleManager : MonoBehaviour
 
     private int playerHp;
     private int playerAttack;
-    private int rewardExp;
 
-    private int enemyHp = 10;
-    private int enemyAttack = 2;
+    private int enemyHp;
+    private int enemyAttack;
 
     private bool battleEnded = false;
 
     private Enemy currentEnemy;
 
 
+
     private void Start()
     {
-        if (GameManager.Instance != null)
-        {
-            playerHp = GameManager.Instance.playerHp;
-            playerAttack = GameManager.Instance.playerAttack;
-        }
-        else
-        {
-            new GameObject("GameManager").AddComponent<GameManager>();
-            playerHp = 20; // デバッグ用
-            playerAttack = 3;
-        }
 
-        playerAttack = GameManager.Instance.playerAttack + GameManager.Instance.weaponPower;
+        InitializePlayer();
+        SetupEnemy();
+        InitializeBattleUI();
+    }
+
+    private void SetupEnemy()
+    {
 
         var enemies = new Enemy[]
         {
-            new Enemy("スライム", 10, 2, 3, 2),
-            new Enemy("ゴブリン", 18, 4, 6, 5),
-            new Enemy("オオカミ", 12, 6, 5, 4),
+           new Enemy("スライム", 10, 2, 3, 2, EnemyType.Normal),
+           new Enemy("ゴブリン", 15, 3, 5, 4, EnemyType.Normal),
+           new Enemy("オオカミ", 12, 4, 4, 3, EnemyType.Double)
         };
+
 
         currentEnemy = enemies[Random.Range(0, enemies.Length)];
 
-        enemyHp = currentEnemy.hp;
-        enemyAttack = currentEnemy.attack;
 
+        int level = GameManager.Instance != null ? GameManager.Instance.playerLevel : 1;
+        int levelBonus = Mathf.Max(0, level - 1);
+        enemyHp = currentEnemy.hp + levelBonus * 2;
+        enemyAttack = currentEnemy.attack + levelBonus;
+        currentEnemy.exp += levelBonus;
+
+    }
+
+    private void InitializeBattleUI()
+    {
 
         RefreshUI();
         enemyText.text = $"{currentEnemy.name}が現れた！";
         messageText.text = "どうする？";
 
-        Debug.Log("現在HP: " + GameManager.Instance.playerHp);
+        if (GameManager.Instance != null)
+        {
+            Debug.Log("現在HP: " + GameManager.Instance.playerHp);
+        }
+    }
+
+
+    private void InitializePlayer()
+    {
+        var gm = GameManager.Instance;
+        if (gm == null)
+        {
+            var go = new GameObject("GameManager");
+            gm = go.AddComponent<GameManager>();
+        }
+
+        playerHp = gm.playerHp;
+        playerAttack = gm.playerAttack + gm.weaponPower;
+
     }
 
     public void Fight()
@@ -95,7 +125,16 @@ public class BattleManager : MonoBehaviour
             return;
         }
 
-        playerHp -= enemyAttack;
+        string msg = "";
+        
+        int damage = CalculateEnemyDamage(out msg);
+        
+        playerHp -= damage;
+
+        messageText.text = $"{currentEnemy.name}に{playerAttack}ダメージ！";
+        messageText.text += $"\n{currentEnemy.name}の反撃！";
+        messageText.text += msg;
+        messageText.text += $"\n{damage}ダメージ！";
 
         if (playerHp <= 0)
         {
@@ -112,12 +151,27 @@ public class BattleManager : MonoBehaviour
         }
 
         RefreshUI();
-        // messageText.text = $"{currentEnemy.name}に{playerAttack}ダメージ！\n{currentEnemy.name}の反撃！ {enemyAttack}ダメージ受けた！";
-        if (!battleEnded)
+
+    }
+
+    private int CalculateEnemyDamage(out string actionMessage)
+    {
+        int damage = enemyAttack;
+        actionMessage = "";
+
+        if (currentEnemy.type == EnemyType.Double)
         {
-            messageText.text = $"{currentEnemy.name}に{playerAttack}ダメージ！\n" + $"{currentEnemy.name}の反撃！{enemyAttack}ダメージ！";
+            damage += enemyAttack;
+            actionMessage += "\n2回攻撃！";
         }
 
+        if (Random.value < 0.3f)
+        {
+            damage *= 2;
+            actionMessage += "\n強攻撃！";
+        }
+
+        return damage;
     }
 
     private void WinBattle()
@@ -192,10 +246,26 @@ public class BattleManager : MonoBehaviour
 
             messageText.text = $"ポーション使用！{healAmount}回復した！";
 
-            // 敵の反撃
-            playerHp -= enemyAttack;
-            messageText.text += $"\n{currentEnemy.name}の反撃！{enemyAttack}ダメージ！";
+            messageText.text += $"\n{currentEnemy.name}の反撃！";
 
+
+            string msg = "";
+
+            int damage = CalculateEnemyDamage(out msg);
+
+
+            // 敵の反撃
+            playerHp -= damage;
+
+            messageText.text += msg;
+
+            messageText.text += $"\n{damage}ダメージ！";
+
+
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.playerHp = playerHp;
+            }
 
             if (playerHp <= 0)
             {
@@ -217,7 +287,7 @@ public class BattleManager : MonoBehaviour
     private void RefreshUI()
     {
         playerHpText.text = $"HP: {playerHp}/{GetTotalMaxHp()}";
-        playerHpText.color = playerHp < 10 ? Color.red : Color.white;
+        playerHpText.color = playerHp <= GetTotalMaxHp() * 0.3f ? Color.red : Color.white;
         enemyHpText.text = $"{currentEnemy.name} HP: {enemyHp}";
 
         if (GameManager.Instance != null)
