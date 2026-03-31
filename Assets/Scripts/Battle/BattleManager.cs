@@ -8,7 +8,16 @@ public class BattleManager : MonoBehaviour
     private enum EnemyType
     {
         Normal,
-        Double
+        Double,
+        Poison,
+        Paralysis
+    }
+
+    private enum StatusEffect
+    {
+        None,
+        Poison,
+        Paralysis
     }
 
     private class Enemy
@@ -40,6 +49,7 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private TMP_Text potionText;
     [SerializeField] private TMP_Text weaponText;
     [SerializeField] private TMP_Text armorText;
+    [SerializeField] private TMP_Text StatusText;
 
     private int playerHp;
     private int playerAttack;
@@ -51,7 +61,9 @@ public class BattleManager : MonoBehaviour
 
     private Enemy currentEnemy;
 
+    private int poisonDamage = 2;
 
+    private StatusEffect playerStatus = StatusEffect.None;
 
     private void Start()
     {
@@ -66,9 +78,10 @@ public class BattleManager : MonoBehaviour
 
         var enemies = new Enemy[]
         {
-           new Enemy("スライム", 10, 2, 3, 2, EnemyType.Normal),
-           new Enemy("ゴブリン", 15, 3, 5, 4, EnemyType.Normal),
-           new Enemy("オオカミ", 12, 4, 4, 3, EnemyType.Double)
+            new Enemy("スライム", 10, 2, 3, 2, EnemyType.Normal),
+            new Enemy("ゴブリン", 15, 3, 5, 4, EnemyType.Poison),
+            new Enemy("オオカミ", 12, 4, 4, 3, EnemyType.Double),
+            new Enemy("バット", 10, 3, 4, 3, EnemyType.Paralysis)
         };
 
 
@@ -109,32 +122,72 @@ public class BattleManager : MonoBehaviour
         playerHp = gm.playerHp;
         playerAttack = gm.playerAttack + gm.weaponPower;
 
+        playerStatus = StatusEffect.None;
+
+        StatusText.text = "";
+
     }
 
     public void Fight()
     {
         if (battleEnded) return;
 
-        enemyHp -= playerAttack;
+        messageText.text = "";
 
-        if (enemyHp <= 0)
+        bool canAct = true;
+
+        if (playerStatus == StatusEffect.Paralysis)
         {
-            enemyHp = 0;
-            RefreshUI();
-            WinBattle();
-            return;
+            if (Random.value < 0.5f)
+            {
+                playerStatus = StatusEffect.None;
+                messageText.text = "しびれが治った！";
+            }
+            else
+            {
+                messageText.text = "体がしびれて動けない！";
+                canAct = false;
+            }
+        }
+
+        if (canAct)
+        {
+            enemyHp -= playerAttack;
+
+            if (enemyHp <= 0)
+            {
+                enemyHp = 0;
+                RefreshUI();
+                WinBattle();
+                return;
+            }
         }
 
         string msg = "";
-        
+
         int damage = CalculateEnemyDamage(out msg);
-        
+
         playerHp -= damage;
 
-        messageText.text = $"{currentEnemy.name}に{playerAttack}ダメージ！";
-        messageText.text += $"\n{currentEnemy.name}の反撃！";
+        string poisonMsg = TryApplyStatus();
+
+        if (canAct)
+        {
+            messageText.text += $"{currentEnemy.name}に{playerAttack}ダメージ！";
+
+            messageText.text += $"\n{currentEnemy.name}の反撃！";
+        }else
+        {
+            messageText.text += $"\n{currentEnemy.name}の攻撃！";
+        }
+
         messageText.text += msg;
         messageText.text += $"\n{damage}ダメージ！";
+        messageText.text += poisonMsg;
+
+
+        messageText.text += ApplyPoisonDamage();
+
 
         if (playerHp <= 0)
         {
@@ -152,6 +205,42 @@ public class BattleManager : MonoBehaviour
 
         RefreshUI();
 
+    }
+
+    private string TryApplyStatus()
+    {
+        if (currentEnemy.type == EnemyType.Poison && Random.value < 0.4f)
+        {
+            playerStatus = StatusEffect.Poison;
+            return "\n毒を受けた！";
+        }
+
+        if (currentEnemy.type == EnemyType.Paralysis && Random.value < 0.3f)
+        {
+            playerStatus = StatusEffect.Paralysis;
+            return "\n体がしびれた！";
+        }
+
+        return "";
+    }
+
+    //private string TryApplyPoison()
+    //{
+    //    if (currentEnemy.type == EnemyType.Poison && Random.value < 0.4f)
+    //    {
+    //        playerStatus = StatusEffect.Poison;
+    //        return "\n毒を受けた！";
+    //    }
+
+    //    return "";
+    //}
+
+    private string ApplyPoisonDamage()
+    {
+        if (playerStatus != StatusEffect.Poison) return "";
+
+        playerHp -= poisonDamage;
+        return $"\n毒で{poisonDamage}ダメージ受けた！";
     }
 
     private int CalculateEnemyDamage(out string actionMessage)
@@ -262,6 +351,12 @@ public class BattleManager : MonoBehaviour
             messageText.text += $"\n{damage}ダメージ！";
 
 
+            string poisonMsg = TryApplyStatus();
+            messageText.text += poisonMsg;
+
+            messageText.text += ApplyPoisonDamage();
+
+
             if (GameManager.Instance != null)
             {
                 GameManager.Instance.playerHp = playerHp;
@@ -297,6 +392,19 @@ public class BattleManager : MonoBehaviour
             potionText.text = $"Potion: {GameManager.Instance.potionCount}";
             weaponText.text = $"武器: {GameManager.Instance.weaponName} (+{GameManager.Instance.weaponPower})";
             armorText.text = $"防具: {GameManager.Instance.armorName} (+HP {GameManager.Instance.armorHpBonus})";
+        }
+
+        switch (playerStatus)
+        {
+            case StatusEffect.None:
+                StatusText.text = "";
+                break;
+            case StatusEffect.Poison:
+                StatusText.text = "毒";
+                break;
+            case StatusEffect.Paralysis:
+                StatusText.text = "麻痺";
+                break;
         }
     }
 
