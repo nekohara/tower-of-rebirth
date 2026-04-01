@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Xml.Linq;
 using TMPro;
 using UnityEngine;
@@ -10,14 +11,16 @@ public class BattleManager : MonoBehaviour
         Normal,
         Double,
         Poison,
-        Paralysis
+        Paralysis,
+        Sleep
     }
 
     private enum StatusEffect
     {
         None,
         Poison,
-        Paralysis
+        Paralysis,
+        Sleep
     }
 
     private class Enemy
@@ -63,7 +66,7 @@ public class BattleManager : MonoBehaviour
 
     private int poisonDamage = 2;
 
-    private StatusEffect playerStatus = StatusEffect.None;
+    private List<StatusEffect> playerStatus = new List<StatusEffect>();
 
     private void Start()
     {
@@ -81,7 +84,8 @@ public class BattleManager : MonoBehaviour
             new Enemy("スライム", 10, 2, 3, 2, EnemyType.Normal),
             new Enemy("ゴブリン", 15, 3, 5, 4, EnemyType.Poison),
             new Enemy("オオカミ", 12, 4, 4, 3, EnemyType.Double),
-            new Enemy("バット", 10, 3, 4, 3, EnemyType.Paralysis)
+            new Enemy("バット", 10, 3, 4, 3, EnemyType.Paralysis),
+            new Enemy("スリープゴースト", 8, 2, 6, 5, EnemyType.Sleep)
         };
 
 
@@ -122,7 +126,7 @@ public class BattleManager : MonoBehaviour
         playerHp = gm.playerHp;
         playerAttack = gm.playerAttack + gm.weaponPower;
 
-        playerStatus = StatusEffect.None;
+        playerStatus.Clear();
 
         StatusText.text = "";
 
@@ -134,21 +138,7 @@ public class BattleManager : MonoBehaviour
 
         messageText.text = "";
 
-        bool canAct = true;
-
-        if (playerStatus == StatusEffect.Paralysis)
-        {
-            if (Random.value < 0.5f)
-            {
-                playerStatus = StatusEffect.None;
-                messageText.text = "しびれが治った！";
-            }
-            else
-            {
-                messageText.text = "体がしびれて動けない！";
-                canAct = false;
-            }
-        }
+        bool canAct = ApplyStatusEffectsAtTurnStart();
 
         if (canAct)
         {
@@ -186,8 +176,14 @@ public class BattleManager : MonoBehaviour
         messageText.text += poisonMsg;
 
 
-        messageText.text += ApplyPoisonDamage();
+        //messageText.text += ApplyPoisonDamage();
+        ApplyStatusEffectsAfterEnemyAction();
 
+        if (playerStatus.Contains(StatusEffect.Sleep) && damage > 0)
+        {
+            playerStatus.Remove(StatusEffect.Sleep);
+            messageText.text += "\n痛みで目を覚ました！";
+        }
 
         if (playerHp <= 0)
         {
@@ -209,38 +205,77 @@ public class BattleManager : MonoBehaviour
 
     private string TryApplyStatus()
     {
-        if (currentEnemy.type == EnemyType.Poison && Random.value < 0.4f)
+        if (currentEnemy.type == EnemyType.Poison && Random.value < 0.4f && !playerStatus.Contains(StatusEffect.Poison))
         {
-            playerStatus = StatusEffect.Poison;
+            playerStatus.Add(StatusEffect.Poison);
             return "\n毒を受けた！";
         }
 
-        if (currentEnemy.type == EnemyType.Paralysis && Random.value < 0.3f)
+        if (currentEnemy.type == EnemyType.Paralysis && Random.value < 0.3f && !playerStatus.Contains(StatusEffect.Paralysis))
         {
-            playerStatus = StatusEffect.Paralysis;
+            playerStatus.Add( StatusEffect.Paralysis);
             return "\n体がしびれた！";
         }
 
+        if (currentEnemy.type == EnemyType.Sleep && Random.value < 0.3f && !playerStatus.Contains(StatusEffect.Sleep))
+        {
+            playerStatus.Add(StatusEffect.Sleep);
+            return "\n眠ってしまった！";
+        }
         return "";
     }
+    private bool ApplyStatusEffectsAtTurnStart()
+    {
+        bool canAct = true;
 
-    //private string TryApplyPoison()
+        if (playerStatus.Contains(StatusEffect.Sleep))
+        {
+            if (Random.value < 0.4f)
+            {
+                playerStatus.Remove(StatusEffect.Sleep);
+                messageText.text += "目を覚ました！";
+            }
+            else
+            {
+                messageText.text += "眠っていて動けない！";
+                canAct = false;
+            }
+        }
+
+        if (playerStatus.Contains(StatusEffect.Paralysis))
+        {
+            if (Random.value < 0.5f)
+            {
+                playerStatus.Remove(StatusEffect.Paralysis);
+                if (messageText.text != "") messageText.text += "\n";
+                messageText.text += "しびれが治った！";
+            }
+            else
+            {
+                if (messageText.text != "") messageText.text += "\n";
+                messageText.text += "体がしびれて動けない！";
+                canAct = false;
+            }
+        }
+
+        return canAct;
+    }
+
+    //private string ApplyPoisonDamage()
     //{
-    //    if (currentEnemy.type == EnemyType.Poison && Random.value < 0.4f)
-    //    {
-    //        playerStatus = StatusEffect.Poison;
-    //        return "\n毒を受けた！";
-    //    }
+    //    if (!playerStatus.Contains(StatusEffect.Poison)) return "";
 
-    //    return "";
+    //    playerHp -= poisonDamage;
+    //    return $"\n毒で{poisonDamage}ダメージ受けた！";
     //}
 
-    private string ApplyPoisonDamage()
+    private void ApplyStatusEffectsAfterEnemyAction()
     {
-        if (playerStatus != StatusEffect.Poison) return "";
-
-        playerHp -= poisonDamage;
-        return $"\n毒で{poisonDamage}ダメージ受けた！";
+        if (playerStatus.Contains(StatusEffect.Poison))
+        {
+            playerHp -= poisonDamage;
+            messageText.text += $"\n毒で{poisonDamage}ダメージ受けた！";
+        }
     }
 
     private int CalculateEnemyDamage(out string actionMessage)
@@ -354,7 +389,7 @@ public class BattleManager : MonoBehaviour
             string poisonMsg = TryApplyStatus();
             messageText.text += poisonMsg;
 
-            messageText.text += ApplyPoisonDamage();
+            ApplyStatusEffectsAfterEnemyAction();
 
 
             if (GameManager.Instance != null)
@@ -394,17 +429,24 @@ public class BattleManager : MonoBehaviour
             armorText.text = $"防具: {GameManager.Instance.armorName} (+HP {GameManager.Instance.armorHpBonus})";
         }
 
-        switch (playerStatus)
+        StatusText.text = "";
+        foreach (StatusEffect effect in playerStatus)
         {
-            case StatusEffect.None:
-                StatusText.text = "";
-                break;
-            case StatusEffect.Poison:
-                StatusText.text = "毒";
-                break;
-            case StatusEffect.Paralysis:
-                StatusText.text = "麻痺";
-                break;
+            switch (effect)
+            {
+                case StatusEffect.None:
+                    StatusText.text = "";
+                    break;
+                case StatusEffect.Poison:
+                    StatusText.text += "毒 ";
+                    break;
+                case StatusEffect.Paralysis:
+                    StatusText.text += "麻痺 ";
+                    break;
+                case StatusEffect.Sleep:
+                    StatusText.text += "睡眠 ";
+                    break;
+            }
         }
     }
 
