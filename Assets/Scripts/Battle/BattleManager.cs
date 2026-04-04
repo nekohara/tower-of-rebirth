@@ -12,7 +12,8 @@ public class BattleManager : MonoBehaviour
         Double,
         Poison,
         Paralysis,
-        Sleep
+        Sleep,
+        Heal
     }
 
     private enum StatusEffect
@@ -43,6 +44,26 @@ public class BattleManager : MonoBehaviour
         }
     }
 
+    [System.Serializable]
+    public class Skill
+    {
+        // powerMultiplier: 攻撃倍率
+        // healAmount: 回復量
+        // isHealSkill: 回復スキルかどうか
+        public string name;
+        public int powerMultiplier;
+        public int healAmount;
+        public bool isHealSkill;
+
+        public Skill(string name, int powerMultiplier, int healAmount, bool isHealSkill)
+        {
+            this.name = name;
+            this.powerMultiplier = powerMultiplier;
+            this.healAmount = healAmount;
+            this.isHealSkill = isHealSkill;
+        }
+    }
+
     [SerializeField] private TMP_Text enemyText;
     [SerializeField] private TMP_Text messageText;
     [SerializeField] private TMP_Text playerHpText;
@@ -66,16 +87,25 @@ public class BattleManager : MonoBehaviour
 
     private int poisonDamage = 2;
 
+    private int enemyHealAmount = 5;
+
+    private int enemyMaxHp;
+
     private List<StatusEffect> playerStatus = new List<StatusEffect>();
+
+    private Skill powerStrike;
+    private Skill healSkill;
 
     private void Start()
     {
 
         InitializePlayer();
         SetupEnemy();
+        InitializeSkills();
         InitializeBattleUI();
     }
 
+    #region 初期化
     private void SetupEnemy()
     {
 
@@ -85,7 +115,8 @@ public class BattleManager : MonoBehaviour
             new Enemy("ゴブリン", 15, 3, 5, 4, EnemyType.Poison),
             new Enemy("オオカミ", 12, 4, 4, 3, EnemyType.Double),
             new Enemy("バット", 10, 3, 4, 3, EnemyType.Paralysis),
-            new Enemy("スリープゴースト", 8, 2, 6, 5, EnemyType.Sleep)
+            new Enemy("スリープゴースト", 8, 2, 6, 5, EnemyType.Sleep),
+            new Enemy("ヒーラーゴブリン", 12, 2, 6, 5, EnemyType.Heal)
         };
 
 
@@ -97,6 +128,9 @@ public class BattleManager : MonoBehaviour
         enemyHp = currentEnemy.hp + levelBonus * 2;
         enemyAttack = currentEnemy.attack + levelBonus;
         currentEnemy.exp += levelBonus;
+
+        enemyMaxHp = currentEnemy.hp + levelBonus * 2;
+        enemyHp = enemyMaxHp;
 
     }
 
@@ -132,6 +166,15 @@ public class BattleManager : MonoBehaviour
 
     }
 
+    private void InitializeSkills()
+    {
+        powerStrike = new Skill("パワーストライク", 2, 0, false);
+        healSkill = new Skill("ヒール", 0, 15, true);
+    }
+
+    #endregion
+
+    #region コマンド処理
     public void Fight()
     {
         if (battleEnded) return;
@@ -152,52 +195,15 @@ public class BattleManager : MonoBehaviour
                 return;
             }
         }
-
-        string msg = "";
-
-        int damage = CalculateEnemyDamage(out msg);
-
-        playerHp -= damage;
-
-        string poisonMsg = TryApplyStatus();
+        string attackMessage = "";
 
         if (canAct)
         {
-            messageText.text += $"{currentEnemy.name}に{playerAttack}ダメージ！";
-
-            messageText.text += $"\n{currentEnemy.name}の反撃！";
-        }else
-        {
-            messageText.text += $"\n{currentEnemy.name}の攻撃！";
+            attackMessage = $"{currentEnemy.name}に{playerAttack}ダメージ！";
         }
 
-        messageText.text += msg;
-        messageText.text += $"\n{damage}ダメージ！";
-        messageText.text += poisonMsg;
+        ExecuteEnemyTurn(canAct, attackMessage);
 
-
-        //messageText.text += ApplyPoisonDamage();
-        ApplyStatusEffectsAfterEnemyAction();
-
-        if (playerStatus.Contains(StatusEffect.Sleep) && damage > 0)
-        {
-            playerStatus.Remove(StatusEffect.Sleep);
-            messageText.text += "\n痛みで目を覚ました！";
-        }
-
-        if (playerHp <= 0)
-        {
-            playerHp = 0;
-            battleEnded = true;
-            RefreshUI();
-            messageText.text = "やられてしまった…";
-            Invoke(nameof(ReturnToDungeon), 1.5f);
-            if (GameManager.Instance != null)
-            {
-                GameManager.Instance.playerHp = playerHp;
-            }
-            return;
-        }
 
         RefreshUI();
 
@@ -213,7 +219,7 @@ public class BattleManager : MonoBehaviour
 
         if (currentEnemy.type == EnemyType.Paralysis && Random.value < 0.3f && !playerStatus.Contains(StatusEffect.Paralysis))
         {
-            playerStatus.Add( StatusEffect.Paralysis);
+            playerStatus.Add(StatusEffect.Paralysis);
             return "\n体がしびれた！";
         }
 
@@ -224,6 +230,7 @@ public class BattleManager : MonoBehaviour
         }
         return "";
     }
+
     private bool ApplyStatusEffectsAtTurnStart()
     {
         bool canAct = true;
@@ -261,13 +268,6 @@ public class BattleManager : MonoBehaviour
         return canAct;
     }
 
-    //private string ApplyPoisonDamage()
-    //{
-    //    if (!playerStatus.Contains(StatusEffect.Poison)) return "";
-
-    //    playerHp -= poisonDamage;
-    //    return $"\n毒で{poisonDamage}ダメージ受けた！";
-    //}
 
     private void ApplyStatusEffectsAfterEnemyAction()
     {
@@ -275,67 +275,6 @@ public class BattleManager : MonoBehaviour
         {
             playerHp -= poisonDamage;
             messageText.text += $"\n毒で{poisonDamage}ダメージ受けた！";
-        }
-    }
-
-    private int CalculateEnemyDamage(out string actionMessage)
-    {
-        int damage = enemyAttack;
-        actionMessage = "";
-
-        if (currentEnemy.type == EnemyType.Double)
-        {
-            damage += enemyAttack;
-            actionMessage += "\n2回攻撃！";
-        }
-
-        if (Random.value < 0.3f)
-        {
-            damage *= 2;
-            actionMessage += "\n強攻撃！";
-        }
-
-        return damage;
-    }
-
-    private void WinBattle()
-    {
-        battleEnded = true;
-
-        messageText.text = $"{currentEnemy.name}を倒した！\n{currentEnemy.exp}経験値と{currentEnemy.gold}Gを手に入れた！";
-
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.playerHp = playerHp;
-            GameManager.Instance.playerExp += currentEnemy.exp;
-            GameManager.Instance.playerGold += currentEnemy.gold;
-            CheckLevelUp();
-        }
-
-        Invoke(nameof(ReturnToDungeon), 2.5f);
-    }
-
-    private void CheckLevelUp()
-    {
-        if (GameManager.Instance == null) return;
-
-        while (GameManager.Instance.playerExp >= GameManager.Instance.nextExp)
-        {
-            GameManager.Instance.playerExp -= GameManager.Instance.nextExp;
-            GameManager.Instance.playerLevel += 1;
-
-            int hpUp = 5;
-            int atkUp = 1;
-
-            GameManager.Instance.nextExp += 5;
-            GameManager.Instance.maxHp += hpUp;
-            GameManager.Instance.playerAttack += atkUp;
-            GameManager.Instance.playerHp = GameManager.Instance.maxHp;
-
-            messageText.text +=
-                $"\nレベルアップ！" +
-                $"\nHP +{hpUp}" +
-                $"\n攻撃 +{atkUp}";
         }
     }
 
@@ -414,6 +353,214 @@ public class BattleManager : MonoBehaviour
         }
     }
 
+    public void UsePowerStrike()
+    {
+        UseSkill(powerStrike);
+    }
+
+    public void UseHealSkill()
+    {
+        UseSkill(healSkill);
+    }
+
+    private void UseSkill(Skill skill)
+    {
+        if (battleEnded) return;
+
+        messageText.text = "";
+
+        bool canAct = ApplyStatusEffectsAtTurnStart();
+
+        if (!canAct)
+        {
+            ExecuteEnemyTurn(false, $"{skill.name}を使えなかった！");
+            return;
+        }
+
+        if (skill.isHealSkill)
+        {
+            playerHp += skill.healAmount;
+            if (playerHp > GetTotalMaxHp())
+            {
+                playerHp = GetTotalMaxHp();
+            }
+
+            messageText.text += $"{skill.name}！\nHPが{skill.healAmount}回復した！";
+        }
+        else
+        {
+            int skillDamage = playerAttack * skill.powerMultiplier;
+            enemyHp -= skillDamage;
+
+            messageText.text += $"{skill.name}！\n{currentEnemy.name}に{skillDamage}ダメージ！";
+
+            if (enemyHp <= 0)
+            {
+                enemyHp = 0;
+                RefreshUI();
+                WinBattle();
+                return;
+            }
+        }
+
+        ExecuteEnemyTurn(true, "");
+    }
+
+    #endregion
+
+    #region 敵処理
+    private bool TryEnemyHeal()
+    {
+        if (currentEnemy.type != EnemyType.Heal) return false;
+
+        if (enemyHp < enemyMaxHp * 0.5f)
+        {
+            int heal = Random.Range(3, (int)(enemyHealAmount * 1.5f) + 1);
+            enemyHp += heal;
+
+            if (enemyHp > enemyMaxHp)
+            {
+                enemyHp = enemyMaxHp;
+            }
+
+            messageText.text += $"\n{currentEnemy.name}は回復した！(+{heal})";
+            return true;
+        }
+
+        return false;
+    }
+
+
+    private int CalculateEnemyDamage(out string actionMessage)
+    {
+        int damage = enemyAttack;
+        actionMessage = "";
+
+        if (currentEnemy.type == EnemyType.Double)
+        {
+            damage += enemyAttack;
+            actionMessage += "\n2回攻撃！";
+        }
+
+        if (Random.value < 0.3f)
+        {
+            damage *= 2;
+            actionMessage += "\n強攻撃！";
+        }
+
+        return damage;
+    }
+
+
+    private void ExecuteEnemyTurn(bool acted, string prefixMessage)
+    {
+        bool didHeal = TryEnemyHeal();
+
+        string msg = "";
+        int damage = 0;
+
+        if (!didHeal)
+        {
+            damage = CalculateEnemyDamage(out msg);
+            playerHp -= damage;
+        }
+
+        string statusMsg = TryApplyStatus();
+
+        if (prefixMessage != "")
+        {
+            if (messageText.text != "") messageText.text += "\n";
+            messageText.text += prefixMessage;
+        }
+
+        if (!didHeal)
+        {
+            if (acted)
+            {
+                messageText.text += $"\n{currentEnemy.name}の反撃！";
+            }
+            else
+            {
+                messageText.text += $"\n{currentEnemy.name}の攻撃！";
+            }
+
+            messageText.text += msg;
+            messageText.text += $"\n{damage}ダメージ！";
+        }
+
+        messageText.text += statusMsg;
+
+        ApplyStatusEffectsAfterEnemyAction();
+
+        if (playerStatus.Contains(StatusEffect.Sleep) && damage > 0)
+        {
+            playerStatus.Remove(StatusEffect.Sleep);
+            messageText.text += "\n痛みで目を覚ました！";
+        }
+
+        if (playerHp <= 0)
+        {
+            playerHp = 0;
+            battleEnded = true;
+            RefreshUI();
+            messageText.text += "やられてしまった…";
+            Invoke(nameof(ReturnToDungeon), 1.5f);
+
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.playerHp = playerHp;
+            }
+            return;
+        }
+
+        RefreshUI();
+    }
+    #endregion
+
+    #region システム処理
+
+    private void WinBattle()
+    {
+        battleEnded = true;
+
+        messageText.text = $"{currentEnemy.name}を倒した！\n{currentEnemy.exp}経験値と{currentEnemy.gold}Gを手に入れた！";
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.playerHp = playerHp;
+            GameManager.Instance.playerExp += currentEnemy.exp;
+            GameManager.Instance.playerGold += currentEnemy.gold;
+            CheckLevelUp();
+        }
+
+        Invoke(nameof(ReturnToDungeon), 2.5f);
+    }
+
+    private void CheckLevelUp()
+    {
+        if (GameManager.Instance == null) return;
+
+        while (GameManager.Instance.playerExp >= GameManager.Instance.nextExp)
+        {
+            GameManager.Instance.playerExp -= GameManager.Instance.nextExp;
+            GameManager.Instance.playerLevel += 1;
+
+            int hpUp = 5;
+            int atkUp = 1;
+
+            GameManager.Instance.nextExp += 5;
+            GameManager.Instance.maxHp += hpUp;
+            GameManager.Instance.playerAttack += atkUp;
+            GameManager.Instance.playerHp = GameManager.Instance.maxHp;
+
+            messageText.text +=
+                $"\nレベルアップ！" +
+                $"\nHP +{hpUp}" +
+                $"\n攻撃 +{atkUp}";
+        }
+    }
+
+
     private void RefreshUI()
     {
         playerHpText.text = $"HP: {playerHp}/{GetTotalMaxHp()}";
@@ -461,7 +608,7 @@ public class BattleManager : MonoBehaviour
     {
         SceneManager.LoadScene("Dungeon");
     }
-
+    #endregion
 
 }
 
