@@ -54,6 +54,8 @@ public class BattleManager : MonoBehaviour
         public int powerMultiplier;
         public int healAmount;
         public bool isHealSkill;
+        public int maxUseCount;
+        public int currentUseCount;
 
         public Skill(string name, int powerMultiplier, int healAmount, bool isHealSkill)
         {
@@ -93,8 +95,7 @@ public class BattleManager : MonoBehaviour
 
     private List<StatusEffect> playerStatus = new List<StatusEffect>();
 
-    private Skill powerStrike;
-    private Skill healSkill;
+    private List<Skill> skills = new List<Skill>();
 
     private void Start()
     {
@@ -168,8 +169,16 @@ public class BattleManager : MonoBehaviour
 
     private void InitializeSkills()
     {
-        powerStrike = new Skill("パワーストライク", 2, 0, false);
-        healSkill = new Skill("ヒール", 0, 15, true);
+        Skill powerStrike = new Skill("パワーストライク", 2, 0, false);
+        powerStrike.maxUseCount = 3;
+        powerStrike.currentUseCount = 3;
+
+        Skill healSkill = new Skill("ヒール", 0, 15, true);
+        healSkill.maxUseCount = 2;
+        healSkill.currentUseCount = 2;
+
+        skills.Add(powerStrike);
+        skills.Add(healSkill); 
     }
 
     #endregion
@@ -355,17 +364,22 @@ public class BattleManager : MonoBehaviour
 
     public void UsePowerStrike()
     {
-        UseSkill(powerStrike);
+        UseSkill(skills.Find(s => s.name == "パワーストライク"));
     }
 
     public void UseHealSkill()
     {
-        UseSkill(healSkill);
+        UseSkill(skills.Find(s => s.name == "ヒール"));
     }
 
     private void UseSkill(Skill skill)
     {
         if (battleEnded) return;
+
+        if (skill == null)
+        {
+            return;
+        }
 
         messageText.text = "";
 
@@ -374,6 +388,12 @@ public class BattleManager : MonoBehaviour
         if (!canAct)
         {
             ExecuteEnemyTurn(false, $"{skill.name}を使えなかった！");
+            return;
+        }
+
+        if (skill.currentUseCount <= 0)
+        {
+            messageText.text = $"{skill.name}はもう使えない！";
             return;
         }
 
@@ -402,6 +422,8 @@ public class BattleManager : MonoBehaviour
                 return;
             }
         }
+
+        skill.currentUseCount--;
 
         ExecuteEnemyTurn(true, "");
     }
