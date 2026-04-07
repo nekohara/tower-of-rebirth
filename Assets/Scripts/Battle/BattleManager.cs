@@ -76,6 +76,8 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private TMP_Text weaponText;
     [SerializeField] private TMP_Text armorText;
     [SerializeField] private TMP_Text StatusText;
+    [SerializeField] private GameObject commandPanel;
+    [SerializeField] private GameObject skillPanel;
 
     private int playerHp;
     private int playerAttack;
@@ -146,6 +148,9 @@ public class BattleManager : MonoBehaviour
         {
             Debug.Log("åªç›HP: " + GameManager.Instance.playerHp);
         }
+
+        if (commandPanel != null) commandPanel.SetActive(true);
+        if (skillPanel != null) skillPanel.SetActive(false);
     }
 
 
@@ -629,6 +634,18 @@ public class BattleManager : MonoBehaviour
     private void ReturnToDungeon()
     {
         SceneManager.LoadScene("Dungeon");
+    }
+
+    public void OpenSkillPanel()
+    {
+        if (commandPanel != null) commandPanel.SetActive(false);
+        if (skillPanel != null) skillPanel.SetActive(true);
+    }
+
+    public void CloseSkillPanel()
+    {
+        if (skillPanel != null) skillPanel.SetActive(false);
+        if (commandPanel != null) commandPanel.SetActive(true);
     }
     #endregion
 
