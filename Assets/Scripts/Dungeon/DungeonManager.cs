@@ -42,7 +42,7 @@ public class DungeonManager : MonoBehaviour
             armorText.text = $"–h‹ï: {GameManager.Instance.armorName} (+HP {GameManager.Instance.armorHpBonus})";
         }
 
-        DungeonNameText.text = $"{dungeonName}:{floor}F";
+        dungeonNameText.text = $"{dungeonName}:{floor}F";
     }
 
 

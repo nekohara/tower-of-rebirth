@@ -1106,7 +1106,7 @@ MonoBehaviour:
   potionText: {fileID: 859260238}
   weaponText: {fileID: 1242737928}
   armorText: {fileID: 2077175566}
-  DungeonNameText: {fileID: 1933760729}
+  dungeonNameText: {fileID: 0}
 --- !u!4 &669636249
 Transform:
   m_ObjectHideFlags: 0
@@ -1159,6 +1159,7 @@ MonoBehaviour:
   moveSpeed: 5
   rotateSpeed: 180
   encounterRate: 0.2
+  messageText: {fileID: 1333616979}
 --- !u!65 &789209077
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2165,8 +2166,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: New Text
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 81330c4cd03233c479c4cfa284b482ab, type: 2}
-  m_sharedMaterial: {fileID: 2560998675670040994, guid: 81330c4cd03233c479c4cfa284b482ab, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: dc99696cd41acb44f8ccd449ac4ac727, type: 2}
+  m_sharedMaterial: {fileID: 7968394432873190383, guid: dc99696cd41acb44f8ccd449ac4ac727, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

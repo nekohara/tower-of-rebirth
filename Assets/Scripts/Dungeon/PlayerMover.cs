@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -8,18 +9,30 @@ public class PlayerMover : MonoBehaviour
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float rotateSpeed = 180f;
     [SerializeField] private float encounterRate = 0.2f;
+    [SerializeField] private TMP_Text messageText;
 
     private bool isMoving = false;
     private Vector3 targetPosition;
     private Quaternion targetRotation = Quaternion.identity;
 
 
+
+    private string[] dungeonMessages =
+{
+    "前に進んだ…",
+    "冷たい風が吹いた…",
+    "奥から物音が聞こえる…",
+    "何かの気配がする…",
+    "足元がぬかるんでいる…",
+    "壁が湿っている…",
+    "静寂が広がっている…"
+};
+
     private void Start()
     {
         targetPosition = transform.position;
         targetRotation = Quaternion.identity;
     }
-
     private void Update()
     {
         if (isMoving)
@@ -74,7 +87,6 @@ public class PlayerMover : MonoBehaviour
 
     private void MoveToTarget()
     {
-        // 回転処理
         if (targetRotation != Quaternion.identity)
         {
             transform.rotation = Quaternion.RotateTowards(
@@ -92,7 +104,6 @@ public class PlayerMover : MonoBehaviour
             return;
         }
 
-        // 移動処理
         transform.position = Vector3.MoveTowards(
             transform.position,
             targetPosition,
@@ -104,11 +115,11 @@ public class PlayerMover : MonoBehaviour
             transform.position = targetPosition;
             isMoving = false;
 
+            ShowRandomMessage();
             CheckEncounter();
         }
-
-
     }
+
     private bool IsWall(Vector3 direction)
     {
         Vector3 origin = transform.position + Vector3.up * 0.5f;
@@ -136,5 +147,17 @@ public class PlayerMover : MonoBehaviour
                 GameManager.Instance.dungeonPlayerRotation = transform.rotation;
             }
         }
+    }
+
+    private void ShowRandomMessage()
+    {
+        if (Random.value < 0.1f)
+        {
+            messageText.text = "強い敵の気配がする…";
+            return;
+        }
+
+        int index = Random.Range(0, dungeonMessages.Length);
+        messageText.text = dungeonMessages[index];
     }
 }
