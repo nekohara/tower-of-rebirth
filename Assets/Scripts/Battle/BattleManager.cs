@@ -355,7 +355,7 @@ public class BattleManager : MonoBehaviour
                 playerHp = 0;
                 battleEnded = true;
                 messageText.text += "\nやられてしまった…";
-                Invoke(nameof(ReturnToDungeon), 1.5f);
+                EndBattle(false);
                 return;
             }
 
@@ -531,12 +531,14 @@ public class BattleManager : MonoBehaviour
             battleEnded = true;
             RefreshUI();
             messageText.text += "やられてしまった…";
-            Invoke(nameof(ReturnToDungeon), 1.5f);
+            //Invoke(nameof(ReturnToDungeon), 1.5f);
 
-            if (GameManager.Instance != null)
-            {
-                GameManager.Instance.playerHp = playerHp;
-            }
+            EndBattle(false);
+
+            //if (GameManager.Instance != null)
+            //{
+            //    GameManager.Instance.playerHp = playerHp;
+            //}
             return;
         }
 
@@ -560,7 +562,8 @@ public class BattleManager : MonoBehaviour
             CheckLevelUp();
         }
 
-        Invoke(nameof(ReturnToDungeon), 2.5f);
+        //Invoke(nameof(ReturnToDungeon), 2.5f);
+        EndBattle(true);
     }
 
     private void CheckLevelUp()
@@ -646,6 +649,35 @@ public class BattleManager : MonoBehaviour
     {
         if (skillPanel != null) skillPanel.SetActive(false);
         if (commandPanel != null) commandPanel.SetActive(true);
+    }
+
+    public void EndBattle(bool isWin)
+    {
+        if (isWin)
+        {
+            Invoke(nameof(ReturnToDungeon), 2.5f);
+        }
+        else
+        {
+            Invoke(nameof(HandleDefeat), 2.5f);
+
+
+        }
+    }
+
+    private void HandleDefeat()
+    {
+        GameManager.Instance.playerHp = Mathf.Max(1, GameManager.Instance.maxHp / 2);
+
+        // 入口座標に戻す場合
+        GameManager.Instance.hasDungeonPosition = false;
+        GameManager.Instance.dungeonPlayerPosition = Vector3.zero;
+        GameManager.Instance.dungeonPlayerRotation = Quaternion.identity;
+
+        // ここ追加
+        messageText.text = "意識を失った…\n気がつくと入口にいた…";
+
+        Invoke(nameof(ReturnToDungeon), 2.5f);
     }
     #endregion
 

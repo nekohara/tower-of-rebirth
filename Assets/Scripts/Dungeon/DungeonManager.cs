@@ -12,6 +12,7 @@ public class DungeonManager : MonoBehaviour
     [SerializeField] private TMP_Text armorText;
     [SerializeField] private TMP_Text dungeonNameText;
 
+
     private string dungeonName = "Dungeon";
     private int floor = 1;
 
@@ -19,6 +20,7 @@ public class DungeonManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        
         RefreshPlayerUI();
 
     }

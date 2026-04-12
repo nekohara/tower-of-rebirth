@@ -64,6 +64,8 @@
     <Compile Include="Assets\Scripts\Core\SceneLoader.cs" />
     <Compile Include="Assets\Scripts\Dungeon\PlayerMover.cs" />
     <Compile Include="Assets\Scripts\Dungeon\DungeonExit.cs" />
+    <Compile Include="Assets\Scripts\Dungeon\DungeonGenerator.cs" />
+    <Compile Include="Assets\Scripts\Dungeon\FadeController.cs" />
     <Compile Include="Assets\Scripts\Battle\BattleManager.cs" />
     <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
     <Compile Include="Assets\Scripts\Data\Weapon.cs" />

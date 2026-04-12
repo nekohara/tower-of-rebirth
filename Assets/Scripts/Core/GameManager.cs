@@ -24,10 +24,16 @@ public class GameManager : MonoBehaviour
     public string armorName = "‚È‚µ";
     public int armorHpBonus = 0;
 
+    public bool hasDungeonPosition = false;
     public Vector3 dungeonPlayerPosition = new Vector3(0f, 0.5f, 0f);
     public Quaternion dungeonPlayerRotation = Quaternion.identity;
 
     public int playerGold = 10;
+
+    public int[,] currentDungeonMap;
+    public bool hasDungeonMap = false;
+
+    public Vector2Int dungeonPlayerGridPos;
 
     private void Awake()
     {
