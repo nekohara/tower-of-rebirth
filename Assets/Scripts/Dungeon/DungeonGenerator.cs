@@ -10,6 +10,7 @@ public class DungeonGenerator : MonoBehaviour
     [SerializeField] private Vector2Int startPosition = new Vector2Int(1, 1);
     [SerializeField] private int width = 15;
     [SerializeField] private int height = 15;
+    [SerializeField] private GameObject chestPrefab;
 
     public Vector2Int StartPosition => startPosition;
 
@@ -144,6 +145,17 @@ public class DungeonGenerator : MonoBehaviour
 
         map[startPosition.y, startPosition.x] = 0;
         map[startPosition.y, startPosition.x + 1] = 0;
+
+        int chestX, chestZ;
+
+        do
+        {
+            chestX = Random.Range(1, width - 1);
+            chestZ = Random.Range(1, height - 1);
+        }
+        while (map[chestZ, chestX] != 0 || (chestX == startPosition.x && chestZ == startPosition.y));
+
+        map[chestZ, chestX] = 2; // •ó” 
     }
 
     private void BuildDungeon()
@@ -159,7 +171,7 @@ public class DungeonGenerator : MonoBehaviour
             {
                 Vector3 basePos = new Vector3(x * tileSize, 0, z * tileSize);
 
-                if (map[z, x] == 0)
+                if (map[z, x] == 0 || map[z, x] == 2)
                 {
                     Instantiate(floorPrefab, basePos, Quaternion.identity, dungeonRoot);
 
@@ -167,6 +179,11 @@ public class DungeonGenerator : MonoBehaviour
                     CreateWallIfNeeded(x, z, 0, 1, basePos, Vector3.forward);
                     CreateWallIfNeeded(x, z, -1, 0, basePos, Vector3.left);
                     CreateWallIfNeeded(x, z, 1, 0, basePos, Vector3.right);
+
+                    if (map[z, x] == 2)
+                    {
+                        Instantiate(chestPrefab, basePos + Vector3.up * 0.5f, Quaternion.identity, dungeonRoot);
+                    }
                 }
             }
         }
@@ -230,8 +247,9 @@ public class DungeonGenerator : MonoBehaviour
             return false;
         }
 
-        return map[z, x] == 0;
+        return map[z, x] == 0 || map[z, x] == 2;
     }
+
     public Vector3 GetWorldPosition(int x, int z)
     {
         return new Vector3(x * tileSize, 0f, z * tileSize);
@@ -243,5 +261,15 @@ public class DungeonGenerator : MonoBehaviour
         int z = Mathf.FloorToInt((worldPos.z + tileSize * 0.5f) / tileSize);
 
         return new Vector2Int(x, z);
+    }
+
+    public int GetTileType(int x, int z)
+    {
+        return map[z, x];
+    }
+
+    public void SetTileType(int x, int z, int value)
+    {
+        map[z, x] = value;
     }
 }

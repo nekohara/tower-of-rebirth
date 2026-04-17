@@ -137,6 +137,7 @@ public class PlayerMover : MonoBehaviour
                 messageText.text = "ï«Ç…ëjÇ‹ÇÍÇƒÇ¢ÇÈÅc";
             }
         }
+
     }
 
     private Vector2Int WorldToGrid(Vector3 worldPos)
@@ -159,6 +160,12 @@ public class PlayerMover : MonoBehaviour
                 transform.rotation = targetRotation;
                 isRotating = false;
                 isMoving = false;
+
+                if (audioSource != null && footstepSE != null)
+                {
+                    audioSource.PlayOneShot(footstepSE);
+                    StartCoroutine(StopSE(0.2f));
+                }
             }
             return;
         }
@@ -183,13 +190,29 @@ public class PlayerMover : MonoBehaviour
 
             ShowRandomMessage();
             CheckEncounter();
+
+
+            Vector2Int grid = WorldToGrid(transform.position);
+
+            if (dungeonGenerator.GetTileType(grid.x, grid.y) == 2)
+            {
+                messageText.text = "ïÛî†Çå©Ç¬ÇØÇΩÅI";
+                GameManager.Instance.potionCount += 1;
+                dungeonGenerator.SetTileType(grid.x, grid.y, 0);
+
+                Collider[] hits = Physics.OverlapSphere(transform.position, 0.6f);
+                foreach (var hit in hits)
+                {
+                    if (hit.CompareTag("Chest"))
+                    {
+                        Destroy(hit.gameObject);
+                        break;
+                    }
+                }
+            }
         }
 
-        if (isRotating && Quaternion.Angle(transform.rotation, targetRotation) < 0.1f)
-        {
-            audioSource.PlayOneShot(footstepSE);
-            StartCoroutine(StopSE(0.2f));
-        }
+        
     }
 
     private void CheckEncounter()
