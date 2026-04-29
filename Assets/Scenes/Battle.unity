@@ -1091,6 +1091,7 @@ GameObject:
   m_Component:
   - component: {fileID: 339710858}
   - component: {fileID: 339710857}
+  - component: {fileID: 339710859}
   m_Layer: 0
   m_Name: BattleManager
   m_TagString: Untagged
@@ -1112,7 +1113,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BattleManager
   enemyText: {fileID: 526953602}
   messageText: {fileID: 1257465007}
-  playerHpText: {fileID: 3932009}
   enemyHpText: {fileID: 507753576}
   levelText: {fileID: 1355974497}
   expText: {fileID: 2128812165}
@@ -1122,8 +1122,6 @@ MonoBehaviour:
   StatusText: {fileID: 1694258295}
   commandPanel: {fileID: 1089577931}
   skillPanel: {fileID: 293961954}
-  dungeonStartPosition: {x: 1, y: 1, z: 0}
-  dungeonStartRotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!4 &339710858
 Transform:
   m_ObjectHideFlags: 0
@@ -1139,6 +1137,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &339710859
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 339710856}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 812d7e910abec2945ab07b22e4e99ff6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StatusUI
+  hpText: {fileID: 3932009}
 --- !u!1 &427470151
 GameObject:
   m_ObjectHideFlags: 0

@@ -4,12 +4,8 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
-    public int playerLevel = 1;
     public int playerExp = 0;
     public int nextExp = 10;
-    public int playerAttack = 3;
-    public int maxHp = 20;
-    public int playerHp = 20;
     public int potionCount = 3;
 
     /// <summary>
@@ -35,8 +31,13 @@ public class GameManager : MonoBehaviour
 
     public Vector2Int dungeonPlayerGridPos;
 
+    public PlayerStatus playerStatus = new PlayerStatus();
+
     private void Awake()
     {
+        if (playerStatus == null)
+            playerStatus = new PlayerStatus();
+
         if (Instance == null)
         {
             Instance = this;
@@ -46,5 +47,6 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+
     }
 }

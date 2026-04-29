@@ -68,7 +68,6 @@ public class BattleManager : MonoBehaviour
 
     [SerializeField] private TMP_Text enemyText;
     [SerializeField] private TMP_Text messageText;
-    [SerializeField] private TMP_Text playerHpText;
     [SerializeField] private TMP_Text enemyHpText;
     [SerializeField] private TMP_Text levelText;
     [SerializeField] private TMP_Text expText;
@@ -126,7 +125,7 @@ public class BattleManager : MonoBehaviour
         currentEnemy = enemies[Random.Range(0, enemies.Length)];
 
 
-        int level = GameManager.Instance != null ? GameManager.Instance.playerLevel : 1;
+        int level = GameManager.Instance != null ? GameManager.Instance.playerStatus.level : 1;
         int levelBonus = Mathf.Max(0, level - 1);
         enemyHp = currentEnemy.hp + levelBonus * 2;
         enemyAttack = currentEnemy.attack + levelBonus;
@@ -146,7 +145,7 @@ public class BattleManager : MonoBehaviour
 
         if (GameManager.Instance != null)
         {
-            Debug.Log("現在HP: " + GameManager.Instance.playerHp);
+            Debug.Log("現在HP: " + GameManager.Instance.playerStatus.hp);
         }
 
         if (commandPanel != null) commandPanel.SetActive(true);
@@ -163,8 +162,8 @@ public class BattleManager : MonoBehaviour
             gm = go.AddComponent<GameManager>();
         }
 
-        playerHp = gm.playerHp;
-        playerAttack = gm.playerAttack + gm.weaponPower;
+        playerHp = gm.playerStatus.hp;
+        playerAttack = gm.playerStatus.attack + gm.weaponPower;
 
         playerStatus.Clear();
 
@@ -301,7 +300,7 @@ public class BattleManager : MonoBehaviour
         Invoke(nameof(ReturnToDungeon), 1.0f);
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.playerHp = playerHp;
+            GameManager.Instance.playerStatus.hp = playerHp;
         }
     }
 
@@ -347,7 +346,7 @@ public class BattleManager : MonoBehaviour
 
             if (GameManager.Instance != null)
             {
-                GameManager.Instance.playerHp = playerHp;
+                GameManager.Instance.playerStatus.hp = playerHp;
             }
 
             if (playerHp <= 0)
@@ -556,7 +555,7 @@ public class BattleManager : MonoBehaviour
 
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.playerHp = playerHp;
+            GameManager.Instance.playerStatus.hp = playerHp;
             GameManager.Instance.playerExp += currentEnemy.exp;
             GameManager.Instance.playerGold += currentEnemy.gold;
             CheckLevelUp();
@@ -573,15 +572,15 @@ public class BattleManager : MonoBehaviour
         while (GameManager.Instance.playerExp >= GameManager.Instance.nextExp)
         {
             GameManager.Instance.playerExp -= GameManager.Instance.nextExp;
-            GameManager.Instance.playerLevel += 1;
+            GameManager.Instance.playerStatus.level += 1;
 
             int hpUp = 5;
             int atkUp = 1;
 
             GameManager.Instance.nextExp += 5;
-            GameManager.Instance.maxHp += hpUp;
-            GameManager.Instance.playerAttack += atkUp;
-            GameManager.Instance.playerHp = GameManager.Instance.maxHp;
+            GameManager.Instance.playerStatus.maxHp += hpUp;
+            GameManager.Instance.playerStatus.attack += atkUp;
+            GameManager.Instance.playerStatus.hp = GameManager.Instance.playerStatus.maxHp;
 
             messageText.text +=
                 $"\nレベルアップ！" +
@@ -593,13 +592,11 @@ public class BattleManager : MonoBehaviour
 
     private void RefreshUI()
     {
-        playerHpText.text = $"HP: {playerHp}/{GetTotalMaxHp()}";
-        playerHpText.color = playerHp <= GetTotalMaxHp() * 0.3f ? Color.red : Color.white;
         enemyHpText.text = $"{currentEnemy.name} HP: {enemyHp}";
 
         if (GameManager.Instance != null)
         {
-            levelText.text = $"Lv: {GameManager.Instance.playerLevel}";
+            levelText.text = $"Lv: {GameManager.Instance.playerStatus.level}";
             expText.text = $"EXP: {GameManager.Instance.playerExp}/{GameManager.Instance.nextExp}";
             potionText.text = $"Potion: {GameManager.Instance.potionCount}";
             weaponText.text = $"武器: {GameManager.Instance.weaponName} (+{GameManager.Instance.weaponPower})";
@@ -625,13 +622,15 @@ public class BattleManager : MonoBehaviour
                     break;
             }
         }
+
+        GameManager.Instance.playerStatus.hp = playerHp;
     }
 
     private int GetTotalMaxHp()
     {
         if (GameManager.Instance == null) return 20;
 
-        return GameManager.Instance.maxHp + GameManager.Instance.armorHpBonus;
+        return GameManager.Instance.playerStatus.maxHp + GameManager.Instance.armorHpBonus;
     }
 
     private void ReturnToDungeon()
@@ -667,7 +666,7 @@ public class BattleManager : MonoBehaviour
 
     private void HandleDefeat()
     {
-        GameManager.Instance.playerHp = Mathf.Max(1, GameManager.Instance.maxHp / 2);
+        GameManager.Instance.playerStatus.hp = Mathf.Max(1, GameManager.Instance.playerStatus.maxHp / 2);
 
         // 入口座標に戻す場合
         GameManager.Instance.hasDungeonPosition = false;

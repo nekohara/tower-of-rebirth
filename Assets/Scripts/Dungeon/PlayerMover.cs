@@ -88,6 +88,8 @@ public class PlayerMover : MonoBehaviour
         }
 
         HandleInput();
+
+        CheckFrontObject();
     }
     private void HandleInput()
     {
@@ -112,6 +114,24 @@ public class PlayerMover : MonoBehaviour
             targetRotation = transform.rotation * Quaternion.Euler(0, 90, 0);
             isRotating = true;
             isMoving = true;
+        }
+
+        if (Keyboard.current.spaceKey.wasPressedThisFrame)
+        {
+            Vector3 forwardDir = new Vector3(transform.forward.x, 0f, transform.forward.z).normalized;
+            Vector3 checkPos = transform.position + forwardDir * moveDistance;
+
+            Collider[] hits = Physics.OverlapSphere(checkPos, 0.4f);
+
+            foreach (var hit in hits)
+            {
+                TreasureBox box = hit.GetComponentInParent<TreasureBox>();
+                if (box != null)
+                {
+                    box.Open();
+                    break;
+                }
+            }
         }
     }
 
@@ -191,25 +211,6 @@ public class PlayerMover : MonoBehaviour
             ShowRandomMessage();
             CheckEncounter();
 
-
-            Vector2Int grid = WorldToGrid(transform.position);
-
-            if (dungeonGenerator.GetTileType(grid.x, grid.y) == 2)
-            {
-                messageText.text = "ïÛî†Çå©Ç¬ÇØÇΩÅI";
-                GameManager.Instance.potionCount += 1;
-                dungeonGenerator.SetTileType(grid.x, grid.y, 0);
-
-                Collider[] hits = Physics.OverlapSphere(transform.position, 0.6f);
-                foreach (var hit in hits)
-                {
-                    if (hit.CompareTag("Chest"))
-                    {
-                        Destroy(hit.gameObject);
-                        break;
-                    }
-                }
-            }
         }
 
         
@@ -226,6 +227,24 @@ public class PlayerMover : MonoBehaviour
         if (Random.value < encounterRate)
         {
             StartCoroutine(EncounterRoutine());
+        }
+    }
+
+    void CheckFrontObject()
+    {
+        Vector3 forwardDir = new Vector3(transform.forward.x, 0f, transform.forward.z).normalized;
+        Vector3 checkPos = transform.position + forwardDir * moveDistance;
+
+        Collider[] hits = Physics.OverlapSphere(checkPos, 0.4f);
+
+        foreach (var hit in hits)
+        {
+            TreasureBox box = hit.GetComponentInParent<TreasureBox>();
+            if (box != null && !box.isOpened)
+            {
+                messageText.text = "ïÛî†Ç™Ç†ÇÈÅc";
+                return;
+            }
         }
     }
 

@@ -1,4 +1,5 @@
 using UnityEngine;
+using static TreasureBox;
 
 public class DungeonGenerator : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class DungeonGenerator : MonoBehaviour
     [SerializeField] private int width = 15;
     [SerializeField] private int height = 15;
     [SerializeField] private GameObject chestPrefab;
+    [SerializeField] private int treasureCount = 5;
 
     public Vector2Int StartPosition => startPosition;
 
@@ -146,16 +148,25 @@ public class DungeonGenerator : MonoBehaviour
         map[startPosition.y, startPosition.x] = 0;
         map[startPosition.y, startPosition.x + 1] = 0;
 
-        int chestX, chestZ;
+        int placed = 0;
+        int safety = 0;
 
-        do
+        while (placed < treasureCount && safety < 1000)
         {
-            chestX = Random.Range(1, width - 1);
-            chestZ = Random.Range(1, height - 1);
-        }
-        while (map[chestZ, chestX] != 0 || (chestX == startPosition.x && chestZ == startPosition.y));
+            safety++;
 
-        map[chestZ, chestX] = 2; // •ó” 
+            int chestX = Random.Range(1, width - 1);
+            int chestZ = Random.Range(1, height - 1);
+
+            if (map[chestZ, chestX] != 0)
+                continue;
+
+            if (chestX == startPosition.x && chestZ == startPosition.y)
+                continue;
+
+            map[chestZ, chestX] = 2;
+            placed++;
+        }
     }
 
     private void BuildDungeon()
@@ -182,7 +193,24 @@ public class DungeonGenerator : MonoBehaviour
 
                     if (map[z, x] == 2)
                     {
-                        Instantiate(chestPrefab, basePos + Vector3.up * 0.5f, Quaternion.identity, dungeonRoot);
+                        GameObject chest = Instantiate(chestPrefab, basePos + Vector3.up * 0.5f, Quaternion.identity, dungeonRoot);
+
+                        TreasureBox box = chest.GetComponent<TreasureBox>();
+
+                        int rand = Random.Range(0, 100);
+
+                        if (rand < 60)
+                        {
+                            box.SetTreasureType(TreasureType.Potion);
+                        }
+                        else if (rand < 90)
+                        {
+                            box.SetTreasureType(TreasureType.Gold);
+                        }
+                        else
+                        {
+                            box.SetTreasureType(TreasureType.Trap);
+                        }
                     }
                 }
             }

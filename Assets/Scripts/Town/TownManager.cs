@@ -5,7 +5,6 @@ public class TownManager : MonoBehaviour
 {
     [SerializeField] private TMP_Text messageText;
     [SerializeField] private TMP_Text levelText;
-    [SerializeField] private TMP_Text hpText;
     [SerializeField] private TMP_Text goldText;
     [SerializeField] private TMP_Text weaponText;
     [SerializeField] private int restCost = 5;
@@ -39,8 +38,8 @@ public class TownManager : MonoBehaviour
 
         if (GameManager.Instance.playerGold >= restCost)
         {
-            GameManager.Instance.playerGold -= restCost;
-            GameManager.Instance.playerHp = GetTotalMaxHp();
+            GameManager.Instance.playerStatus.gold -= restCost;
+            GameManager.Instance.playerStatus.hp = GetTotalMaxHp();
 
             if (messageText != null)
             {
@@ -128,14 +127,14 @@ public class TownManager : MonoBehaviour
             GameManager.Instance.armorName = armor.name;
             GameManager.Instance.armorHpBonus = armor.hpBonus;
 
-            int newMaxHp = GameManager.Instance.playerLevel * 0; // 使わないので無視してOK
-            int oldMaxHp = GameManager.Instance.maxHp;
+            int newMaxHp = GameManager.Instance.playerStatus.level * 0; // 使わないので無視してOK
+            int oldMaxHp = GameManager.Instance.playerStatus.maxHp;
             int totalMaxHp = GetTotalMaxHp();
 
             // 装備した瞬間に現在HPも上限内で調整
-            if (GameManager.Instance.playerHp > totalMaxHp)
+            if (GameManager.Instance.playerStatus.hp > totalMaxHp)
             {
-                GameManager.Instance.playerHp = totalMaxHp;
+                GameManager.Instance.playerStatus.hp = totalMaxHp;
             }
 
             messageText.text = $"{armor.name}を装備した！最大HPアップ！";
@@ -152,15 +151,14 @@ public class TownManager : MonoBehaviour
     {
         if (GameManager.Instance == null) return 20;
 
-        return GameManager.Instance.maxHp + GameManager.Instance.armorHpBonus;
+        return GameManager.Instance.playerStatus.maxHp + GameManager.Instance.armorHpBonus;
     }
     private void RefreshUI()
     {
         if (GameManager.Instance == null) return;
 
-        levelText.text = $"Lv: {GameManager.Instance.playerLevel}";
-        hpText.text = $"HP: {GameManager.Instance.playerHp}/{GetTotalMaxHp()}";
-        goldText.text = $"Gold: {GameManager.Instance.playerGold}";
+        levelText.text = $"Lv: {GameManager.Instance.playerStatus.level}";
+        goldText.text = $"Gold: {GameManager.Instance.playerStatus.gold}";
         weaponText.text = $"武器: {GameManager.Instance.weaponName} (+{GameManager.Instance.weaponPower})";
         armorText.text = $"防具: {GameManager.Instance.armorName} (+HP {GameManager.Instance.armorHpBonus})";
         potionText.text = $"Potion: {GameManager.Instance.potionCount}";
