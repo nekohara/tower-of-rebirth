@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Xml.Linq;
 using TMPro;
@@ -31,9 +32,10 @@ public class BattleManager : MonoBehaviour
         public int attack;
         public int exp;
         public int gold;
+        public int speed;
         public EnemyType type;
 
-        public Enemy(string name, int hp, int attack, int exp, int gold, EnemyType type)
+        public Enemy(string name, int hp, int attack, int speed, int exp, int gold, EnemyType type)
         {
             this.name = name;
             this.hp = hp;
@@ -41,6 +43,7 @@ public class BattleManager : MonoBehaviour
             this.exp = exp;
             this.gold = gold;
             this.type = type;
+            this.speed = speed;
         }
     }
 
@@ -113,12 +116,12 @@ public class BattleManager : MonoBehaviour
 
         var enemies = new Enemy[]
         {
-            new Enemy("スライム", 10, 2, 3, 2, EnemyType.Normal),
-            new Enemy("ゴブリン", 15, 3, 5, 4, EnemyType.Poison),
-            new Enemy("オオカミ", 12, 4, 4, 3, EnemyType.Double),
-            new Enemy("バット", 10, 3, 4, 3, EnemyType.Paralysis),
-            new Enemy("スリープゴースト", 8, 2, 6, 5, EnemyType.Sleep),
-            new Enemy("ヒーラーゴブリン", 12, 2, 6, 5, EnemyType.Heal)
+            new Enemy("スライム", 10, 2, 1, 2, 3,  EnemyType.Normal),
+            new Enemy("ゴブリン", 15, 3, 2, 5, 4, EnemyType.Poison),
+            new Enemy("オオカミ", 12, 4, 3, 4, 5, EnemyType.Double),
+            new Enemy("バット", 10, 3, 3, 3, 3, EnemyType.Paralysis),
+            new Enemy("スリープゴースト", 8, 2, 2, 6, 5, EnemyType.Sleep),
+            new Enemy("ヒーラーゴブリン", 12, 2, 3, 6, 5, EnemyType.Heal)
         };
 
 
@@ -150,6 +153,8 @@ public class BattleManager : MonoBehaviour
 
         if (commandPanel != null) commandPanel.SetActive(true);
         if (skillPanel != null) skillPanel.SetActive(false);
+
+        StartCoroutine(EnemyFirstRoutine());
     }
 
 
@@ -295,12 +300,31 @@ public class BattleManager : MonoBehaviour
     {
         if (battleEnded) return;
 
-        battleEnded = true;
-        messageText.text = "逃げ出した！";
-        Invoke(nameof(ReturnToDungeon), 1.0f);
-        if (GameManager.Instance != null)
+        int speed = GameManager.Instance.playerStatus.speed;
+        int enemySpeed = currentEnemy.speed;
+
+        float escapeRate =
+            0.5f +
+            (speed - enemySpeed) * 0.08f;
+
+        escapeRate = Mathf.Clamp(escapeRate, 0.1f, 0.9f);
+
+        if (Random.value < escapeRate)
         {
-            GameManager.Instance.playerStatus.hp = playerHp;
+
+            battleEnded = true;
+            messageText.text = "逃げ出した！";
+            Invoke(nameof(ReturnToDungeon), 1.0f);
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.playerStatus.hp = playerHp;
+            }
+
+        }
+        else
+        {
+            messageText.text = "逃げられなかった！";
+            ExecuteEnemyTurn(false, "");
         }
     }
 
@@ -435,6 +459,46 @@ public class BattleManager : MonoBehaviour
     #endregion
 
     #region 敵処理
+
+
+    private IEnumerator EnemyFirstRoutine()
+    {
+        bool playerFirst = CheckPlayerFirst();
+
+        if (playerFirst)
+        {
+            messageText.text = "先制攻撃のチャンス！\nどうする？";
+
+            if (commandPanel != null) commandPanel.SetActive(true);
+
+            yield break;
+        }
+
+        if (commandPanel != null) commandPanel.SetActive(false);
+
+        if (currentEnemy.speed >= 10)
+        {
+            messageText.text = $"{currentEnemy.name}が電光石火で襲いかかってきた！";
+        }
+        else if (currentEnemy.speed >= 5)
+        {
+            messageText.text = $"{currentEnemy.name}が素早く動いた！";
+        }
+        else
+        {
+            messageText.text = $"{currentEnemy.name}が動き出した！";
+        }
+        yield return new WaitForSeconds(1.0f);
+
+        ExecuteEnemyTurn(false, "");
+
+        if (!battleEnded && commandPanel != null)
+        {
+            commandPanel.SetActive(true);
+        }
+    }
+
+
     private bool TryEnemyHeal()
     {
         if (currentEnemy.type != EnemyType.Heal) return false;
@@ -546,6 +610,18 @@ public class BattleManager : MonoBehaviour
     #endregion
 
     #region システム処理
+    private bool CheckPlayerFirst()
+    {
+        int playerSpeed = GameManager.Instance.playerStatus.speed;
+        int enemySpeed = currentEnemy.speed;
+
+        int playerRoll = playerSpeed + Random.Range(0, 5);
+        int enemyRoll = enemySpeed + Random.Range(0, 5);
+
+        Debug.Log($"PlayerSpeed:{playerRoll} EnemySpeed:{enemyRoll}");
+
+        return playerRoll >= enemyRoll;
+    }
 
     private void WinBattle()
     {

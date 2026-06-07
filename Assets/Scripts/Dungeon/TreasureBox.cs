@@ -41,6 +41,12 @@ public class TreasureBox : MonoBehaviour
 
         // 中身判定
         int luck = GameManager.Instance.playerStatus.luck;
+        int rareRate = Mathf.Min(30, 5 + luck);
+
+
+        // ★レア判定
+        bool isRare = Random.Range(0, 100) < rareRate;
+
 
         switch (treasureType)
         {
@@ -51,11 +57,29 @@ public class TreasureBox : MonoBehaviour
                 break;
 
             case TreasureType.Gold:
-                int gold = Random.Range(10, 100) + luck * 2;
-                messageText.text = $"{gold}ゴールドを手に入れた！";
+                
+                int baseGold = Random.Range(10, 100) + luck * 2;
+
+
+                int gold = isRare ? baseGold * 3 : baseGold;
+
+                if (isRare)
+                {
+                    messageText.text = $"レア宝箱！{gold}ゴールドを手に入れた！";
+                }
+                else
+                {
+                    string[] messages =
+                     {
+                        $"{gold}ゴールドを手に入れた！",
+                        $"{gold}Gゲット！",
+                        $"{gold}ゴールドを発見！"
+                    };
+
+                    messageText.text = messages[Random.Range(0, messages.Length)];
+                }
                 GameManager.Instance.playerStatus.gold += gold;
                 break;
-
             case TreasureType.Trap:
                 int damage = Random.Range(1, 10)
                             - GameManager.Instance.playerStatus.defense
