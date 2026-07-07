@@ -231,7 +231,7 @@ public class DungeonGenerator : MonoBehaviour
 
             if (dir == Vector3.forward || dir == Vector3.back)
             {
-                rot = Quaternion.identity;
+                rot = Quaternion.Euler(0,0,0);
             }
             else
             {
@@ -280,7 +280,7 @@ public class DungeonGenerator : MonoBehaviour
 
     public Vector3 GetWorldPosition(int x, int z)
     {
-        return new Vector3(x * tileSize, 0f, z * tileSize);
+        return new Vector3(x * tileSize, 0.4f, z * tileSize);
     }
 
     public Vector2Int WorldToGrid(Vector3 worldPos)

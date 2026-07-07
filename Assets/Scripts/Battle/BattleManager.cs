@@ -25,6 +25,25 @@ public class BattleManager : MonoBehaviour
         Sleep
     }
 
+    private enum BattleState
+    {
+        Start,
+        PlayerCommand,
+        ExecutingTurn,
+        Win,
+        Lose
+    }
+
+    private enum BattleCommand
+    {
+        Attack,
+        Skill,
+        Defend,
+        Item,
+        Escape
+    }
+
+    //[CreateAssetMenu(menuName = "RPG/Enemy")]
     private class Enemy
     {
         public string name;
@@ -34,6 +53,8 @@ public class BattleManager : MonoBehaviour
         public int gold;
         public int speed;
         public EnemyType type;
+        public GameObject battlePrefab;
+    
 
         public Enemy(string name, int hp, int attack, int speed, int exp, int gold, EnemyType type)
         {
@@ -97,9 +118,22 @@ public class BattleManager : MonoBehaviour
 
     private int enemyMaxHp;
 
+    private BattleState currentState;
+
     private List<StatusEffect> playerStatus = new List<StatusEffect>();
 
     private List<Skill> skills = new List<Skill>();
+
+    [SerializeField] private Transform enemyRoot;
+    [SerializeField] private Transform enemySpawnPoint;
+
+    private GameObject currentEnemyObject;
+
+    [SerializeField] private GameObject goblinPrefab;
+    [SerializeField] private GameObject slimePrefab;
+    [SerializeField] private GameObject batPrefab;
+    [SerializeField] private GameObject gohstPrefab;
+    [SerializeField] private GameObject mushPrefab;
 
     private void Start()
     {
@@ -116,12 +150,26 @@ public class BattleManager : MonoBehaviour
 
         var enemies = new Enemy[]
         {
-            new Enemy("スライム", 10, 2, 1, 2, 3,  EnemyType.Normal),
-            new Enemy("ゴブリン", 15, 3, 2, 5, 4, EnemyType.Poison),
-            new Enemy("オオカミ", 12, 4, 3, 4, 5, EnemyType.Double),
-            new Enemy("バット", 10, 3, 3, 3, 3, EnemyType.Paralysis),
-            new Enemy("スリープゴースト", 8, 2, 2, 6, 5, EnemyType.Sleep),
-            new Enemy("ヒーラーゴブリン", 12, 2, 3, 6, 5, EnemyType.Heal)
+            new Enemy("スライム", 10, 2, 1, 2, 3,  EnemyType.Normal){
+                battlePrefab = slimePrefab
+            },
+            new Enemy("ゴブリン", 15, 3, 2, 5, 4, EnemyType.Poison)
+            {
+                battlePrefab = goblinPrefab
+            },
+            new Enemy("キノコ", 12, 4, 3, 4, 5, EnemyType.Double)
+            {
+                battlePrefab=mushPrefab
+            },
+            new Enemy("バット", 10, 3, 3, 3, 3, EnemyType.Paralysis)
+            {
+                battlePrefab = batPrefab
+            },
+            new Enemy("スリープゴースト", 8, 2, 2, 6, 5, EnemyType.Sleep)
+            {
+                battlePrefab = gohstPrefab
+            },
+            //new Enemy("ヒーラーゴブリン", 12, 2, 3, 6, 5, EnemyType.Heal)
         };
 
 
@@ -137,6 +185,13 @@ public class BattleManager : MonoBehaviour
         enemyMaxHp = currentEnemy.hp + levelBonus * 2;
         enemyHp = enemyMaxHp;
 
+        currentEnemyObject = Instantiate(
+       currentEnemy.battlePrefab,
+       enemySpawnPoint.position,
+       enemySpawnPoint.rotation,
+       enemyRoot
+   );
+
     }
 
     private void InitializeBattleUI()
@@ -151,10 +206,14 @@ public class BattleManager : MonoBehaviour
             Debug.Log("現在HP: " + GameManager.Instance.playerStatus.hp);
         }
 
+        currentState = BattleState.Start;
+
+
         if (commandPanel != null) commandPanel.SetActive(true);
         if (skillPanel != null) skillPanel.SetActive(false);
 
         StartCoroutine(EnemyFirstRoutine());
+
     }
 
 
@@ -195,36 +254,28 @@ public class BattleManager : MonoBehaviour
     #region コマンド処理
     public void Fight()
     {
+        SelectCommand(BattleCommand.Attack);
+    }
+
+    public void Heal()
+    {
+        SelectCommand(BattleCommand.Item);
+    }
+
+    public void RunAway()
+    {
+        SelectCommand(BattleCommand.Escape);
+    }
+
+    private void SelectCommand(BattleCommand command)
+    {
         if (battleEnded) return;
+        if (currentState != BattleState.PlayerCommand) return;
 
-        messageText.text = "";
-
-        bool canAct = ApplyStatusEffectsAtTurnStart();
-
-        if (canAct)
-        {
-            enemyHp -= playerAttack;
-
-            if (enemyHp <= 0)
-            {
-                enemyHp = 0;
-                RefreshUI();
-                WinBattle();
-                return;
-            }
-        }
-        string attackMessage = "";
-
-        if (canAct)
-        {
-            attackMessage = $"{currentEnemy.name}に{playerAttack}ダメージ！";
-        }
-
-        ExecuteEnemyTurn(canAct, attackMessage);
+        currentState = BattleState.ExecutingTurn;
 
 
-        RefreshUI();
-
+        StartCoroutine(ExecuteTurn(command));
     }
 
     private string TryApplyStatus()
@@ -247,6 +298,66 @@ public class BattleManager : MonoBehaviour
             return "\n眠ってしまった！";
         }
         return "";
+    }
+
+    private IEnumerator ExecuteTurn(BattleCommand command)
+    {
+        currentState = BattleState.ExecutingTurn;
+        commandPanel.SetActive(false);
+
+        bool playerFirst = CheckPlayerFirst();
+
+        if (playerFirst)
+        {
+            ExecutePlayerAction(command);
+            RefreshUI();
+            if (CheckBattleEnd()) yield break;
+
+            yield return new WaitForSeconds(0.5f);
+
+            ExecuteEnemyTurn(true, "");
+            RefreshUI();
+            if (CheckBattleEnd()) yield break;
+        }
+        else
+        {
+            ExecuteEnemyTurn(false, "");
+            RefreshUI();
+            if (CheckBattleEnd()) yield break;
+
+            yield return new WaitForSeconds(0.5f);
+
+            ExecutePlayerAction(command);
+            RefreshUI();
+            if (CheckBattleEnd()) yield break;
+        }
+
+        currentState = BattleState.PlayerCommand;
+        commandPanel.SetActive(true);
+        messageText.text += "\nどうする？";
+    }
+
+    private void ExecutePlayerAction(BattleCommand command)
+    {
+        switch (command)
+        {
+            case BattleCommand.Attack:
+                enemyHp -= playerAttack;
+                messageText.text = $"{currentEnemy.name}に{playerAttack}ダメージ！";
+                break;
+            case BattleCommand.Item:
+                messageText.text = "アイテムはまだ未実装！";
+                break;
+            case BattleCommand.Skill:
+                messageText.text = "スキルはまだ未実装！";
+                break;
+            case BattleCommand.Defend:
+                messageText.text = "防御はまだ未実装！";
+                break;
+            case BattleCommand.Escape:
+                messageText.text = "逃げるはまだ未実装！";
+                break;
+        }
     }
 
     private bool ApplyStatusEffectsAtTurnStart()
@@ -287,6 +398,30 @@ public class BattleManager : MonoBehaviour
     }
 
 
+    private bool CheckBattleEnd()
+    {
+        if (enemyHp <= 0)
+        {
+            enemyHp = 0;
+            RefreshUI();
+            WinBattle();
+            return true;
+        }
+
+        if (playerHp <= 0)
+        {
+            playerHp = 0;
+            battleEnded = true;
+            RefreshUI();
+            EndBattle(false);
+            return true;
+        }
+
+        return false;
+    }
+
+
+
     private void ApplyStatusEffectsAfterEnemyAction()
     {
         if (playerStatus.Contains(StatusEffect.Poison))
@@ -296,99 +431,99 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    public void RunAway()
-    {
-        if (battleEnded) return;
+    //public void RunAway()
+    //{
+    //    if (battleEnded) return;
 
-        int speed = GameManager.Instance.playerStatus.speed;
-        int enemySpeed = currentEnemy.speed;
+    //    int speed = GameManager.Instance.playerStatus.speed;
+    //    int enemySpeed = currentEnemy.speed;
 
-        float escapeRate =
-            0.5f +
-            (speed - enemySpeed) * 0.08f;
+    //    float escapeRate =
+    //        0.5f +
+    //        (speed - enemySpeed) * 0.08f;
 
-        escapeRate = Mathf.Clamp(escapeRate, 0.1f, 0.9f);
+    //    escapeRate = Mathf.Clamp(escapeRate, 0.1f, 0.9f);
 
-        if (Random.value < escapeRate)
-        {
+    //    if (Random.value < escapeRate)
+    //    {
 
-            battleEnded = true;
-            messageText.text = "逃げ出した！";
-            Invoke(nameof(ReturnToDungeon), 1.0f);
-            if (GameManager.Instance != null)
-            {
-                GameManager.Instance.playerStatus.hp = playerHp;
-            }
+    //        battleEnded = true;
+    //        messageText.text = "逃げ出した！";
+    //        Invoke(nameof(ReturnToDungeon), 1.0f);
+    //        if (GameManager.Instance != null)
+    //        {
+    //            GameManager.Instance.playerStatus.hp = playerHp;
+    //        }
 
-        }
-        else
-        {
-            messageText.text = "逃げられなかった！";
-            ExecuteEnemyTurn(false, "");
-        }
-    }
+    //    }
+    //    else
+    //    {
+    //        messageText.text = "逃げられなかった！";
+    //        ExecuteEnemyTurn(false, "");
+    //    }
+    //}
 
-    public void Heal()
-    {
-        if (battleEnded) return;
+    //public void Heal()
+    //{
+    //    if (battleEnded) return;
 
-        if (GameManager.Instance != null && GameManager.Instance.potionCount > 0)
-        {
-            int healAmount = 10;
+    //    if (GameManager.Instance != null && GameManager.Instance.potionCount > 0)
+    //    {
+    //        int healAmount = 10;
 
-            playerHp += healAmount;
-            if (playerHp > GetTotalMaxHp())
-            {
-                playerHp = GetTotalMaxHp();
-            }
+    //        playerHp += healAmount;
+    //        if (playerHp > GetTotalMaxHp())
+    //        {
+    //            playerHp = GetTotalMaxHp();
+    //        }
 
-            GameManager.Instance.potionCount--;
+    //        GameManager.Instance.potionCount--;
 
-            messageText.text = $"ポーション使用！{healAmount}回復した！";
+    //        messageText.text = $"ポーション使用！{healAmount}回復した！";
 
-            messageText.text += $"\n{currentEnemy.name}の反撃！";
-
-
-            string msg = "";
-
-            int damage = CalculateEnemyDamage(out msg);
+    //        messageText.text += $"\n{currentEnemy.name}の反撃！";
 
 
-            // 敵の反撃
-            playerHp -= damage;
+    //        string msg = "";
 
-            messageText.text += msg;
-
-            messageText.text += $"\n{damage}ダメージ！";
+    //        int damage = CalculateEnemyDamage(out msg);
 
 
-            string poisonMsg = TryApplyStatus();
-            messageText.text += poisonMsg;
+    //        // 敵の反撃
+    //        playerHp -= damage;
 
-            ApplyStatusEffectsAfterEnemyAction();
+    //        messageText.text += msg;
+
+    //        messageText.text += $"\n{damage}ダメージ！";
 
 
-            if (GameManager.Instance != null)
-            {
-                GameManager.Instance.playerStatus.hp = playerHp;
-            }
+    //        string poisonMsg = TryApplyStatus();
+    //        messageText.text += poisonMsg;
 
-            if (playerHp <= 0)
-            {
-                playerHp = 0;
-                battleEnded = true;
-                messageText.text += "\nやられてしまった…";
-                EndBattle(false);
-                return;
-            }
+    //        ApplyStatusEffectsAfterEnemyAction();
 
-            RefreshUI();
-        }
-        else
-        {
-            messageText.text = "ポーションがない！";
-        }
-    }
+
+    //        if (GameManager.Instance != null)
+    //        {
+    //            GameManager.Instance.playerStatus.hp = playerHp;
+    //        }
+
+    //        if (playerHp <= 0)
+    //        {
+    //            playerHp = 0;
+    //            battleEnded = true;
+    //            messageText.text += "\nやられてしまった…";
+    //            EndBattle(false);
+    //            return;
+    //        }
+
+    //        RefreshUI();
+    //    }
+    //    else
+    //    {
+    //        messageText.text = "ポーションがない！";
+    //    }
+    //}
 
     public void UsePowerStrike()
     {
@@ -468,6 +603,7 @@ public class BattleManager : MonoBehaviour
         if (playerFirst)
         {
             messageText.text = "先制攻撃のチャンス！\nどうする？";
+            currentState = BattleState.PlayerCommand;
 
             if (commandPanel != null) commandPanel.SetActive(true);
 
@@ -494,6 +630,7 @@ public class BattleManager : MonoBehaviour
 
         if (!battleEnded && commandPanel != null)
         {
+            currentState = BattleState.PlayerCommand;
             commandPanel.SetActive(true);
         }
     }

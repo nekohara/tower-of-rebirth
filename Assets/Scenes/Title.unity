@@ -586,6 +586,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
+  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -640,6 +641,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd65fd533d1960842abb310b1331dc15, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+  playerExp: 0
+  nextExp: 10
+  potionCount: 3
+  weaponName: "\u306A\u3057"
+  weaponPower: 0
+  armorName: "\u306A\u3057"
+  armorHpBonus: 0
+  hasDungeonPosition: 0
+  dungeonPlayerPosition: {x: 0, y: 0.5, z: 0}
+  dungeonPlayerRotation: {x: 0, y: 0, z: 0, w: 1}
+  playerGold: 10
+  hasDungeonMap: 0
+  dungeonPlayerGridPos: {x: 0, y: 0}
+  playerStatus:
+    level: 1
+    maxHp: 20
+    hp: 20
+    attack: 3
+    defense: 1
+    speed: 5
+    luck: 1
+    gold: 0
 --- !u!4 &1423033037
 Transform:
   m_ObjectHideFlags: 0
@@ -959,7 +982,7 @@ Light:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2092489502}
   m_Enabled: 1
-  serializedVersion: 12
+  serializedVersion: 13
   m_Type: 1
   m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
   m_Intensity: 1
@@ -1011,7 +1034,7 @@ Light:
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
-  m_ShadowRadius: 0
+  m_ShapeRadius: 0
   m_ShadowAngle: 0
   m_LightUnit: 1
   m_LuxAtDistance: 1
