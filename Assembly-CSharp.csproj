@@ -62,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Core\SceneLoader.cs" />
+    <Compile Include="Assets\Scripts\UI\BattleMessageController.cs" />
     <Compile Include="Assets\Scripts\Dungeon\PlayerMover.cs" />
     <Compile Include="Assets\Scripts\Dungeon\DungeonExit.cs" />
     <Compile Include="Assets\Scripts\Dungeon\DungeonGenerator.cs" />
@@ -72,6 +73,7 @@
     <Compile Include="Assets\Scripts\Data\Weapon.cs" />
     <Compile Include="Assets\Scripts\Core\StatusUI.cs" />
     <Compile Include="Assets\Scripts\Dungeon\DungeonPlayerRestore.cs" />
+    <Compile Include="Assets\Scripts\Data\Item.cs" />
     <Compile Include="Assets\Scripts\Data\Armor.cs" />
     <Compile Include="Assets\Scripts\Core\GameManager.cs" />
     <Compile Include="Assets\Scripts\Town\TownManager.cs" />

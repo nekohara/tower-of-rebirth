@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Linq;
 using TMPro;
 using UnityEngine;
@@ -41,6 +42,13 @@ public class BattleManager : MonoBehaviour
         Defend,
         Item,
         Escape
+    }
+
+    private enum ActionResult
+    {
+        Success,        // 行動成功、敵行動へ
+        Failed,         // 行動不成立、コマンド選択へ戻る
+        BattleEnded     // 逃走成功など、戦闘終了
     }
 
     //[CreateAssetMenu(menuName = "RPG/Enemy")]
@@ -90,6 +98,40 @@ public class BattleManager : MonoBehaviour
         }
     }
 
+    private class BattleAction
+    {
+        public bool isPlayer;
+        public BattleCommand command;
+        public int speed;
+
+        public Skill Skill;      // スキル使用時
+        public InventoryItem Item;        // アイテム使用時
+
+
+        public BattleAction(bool isPlayer, BattleCommand command, int speed)
+        {
+            this.isPlayer = isPlayer;
+            this.command = command;
+            this.speed = speed;
+        }
+        public BattleAction()
+        {
+
+        }
+    }
+
+    private class BattleActionResult
+    {
+        public ActionResult result;
+        public string message;
+
+        public BattleActionResult(ActionResult result, string message)
+        {
+            this.result = result;
+            this.message = message;
+        }
+    }
+
     [SerializeField] private TMP_Text enemyText;
     [SerializeField] private TMP_Text messageText;
     [SerializeField] private TMP_Text enemyHpText;
@@ -101,6 +143,7 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private TMP_Text StatusText;
     [SerializeField] private GameObject commandPanel;
     [SerializeField] private GameObject skillPanel;
+    [SerializeField] private GameObject messageManger;
 
     private int playerHp;
     private int playerAttack;
@@ -124,6 +167,12 @@ public class BattleManager : MonoBehaviour
 
     private List<Skill> skills = new List<Skill>();
 
+    private bool isDefending;
+
+    private bool reachedCriticalHpThisBattle;
+
+    private List<GrowthResult> growthResults = new List<GrowthResult>();
+
     [SerializeField] private Transform enemyRoot;
     [SerializeField] private Transform enemySpawnPoint;
 
@@ -134,6 +183,8 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private GameObject batPrefab;
     [SerializeField] private GameObject gohstPrefab;
     [SerializeField] private GameObject mushPrefab;
+
+
 
     private void Start()
     {
@@ -209,11 +260,10 @@ public class BattleManager : MonoBehaviour
         currentState = BattleState.Start;
 
 
-        if (commandPanel != null) commandPanel.SetActive(true);
+        if (commandPanel != null) commandPanel.SetActive(false);
         if (skillPanel != null) skillPanel.SetActive(false);
 
         StartCoroutine(EnemyFirstRoutine());
-
     }
 
 
@@ -227,7 +277,7 @@ public class BattleManager : MonoBehaviour
         }
 
         playerHp = gm.playerStatus.hp;
-        playerAttack = gm.playerStatus.attack + gm.weaponPower;
+        playerAttack = gm.playerStatus.GetAttackPower(gm.weaponPower);
 
         playerStatus.Clear();
 
@@ -255,27 +305,56 @@ public class BattleManager : MonoBehaviour
     public void Fight()
     {
         SelectCommand(BattleCommand.Attack);
+
+
     }
 
     public void Heal()
     {
-        SelectCommand(BattleCommand.Item);
+        var potion = GameManager.Instance.playerStatus.inventory
+        .FirstOrDefault(x => x.id == "potion" && x.count > 0);
+
+        SelectCommand(BattleCommand.Item, null, potion);
     }
 
     public void RunAway()
     {
         SelectCommand(BattleCommand.Escape);
     }
+    private void SelectSkill(Skill skill)
+    {
+        SelectCommand(BattleCommand.Skill, skill);
+    }
 
-    private void SelectCommand(BattleCommand command)
+
+    public void Defened()
+    {
+        SelectCommand(BattleCommand.Defend);
+    }
+
+    private void SelectCommand(
+    BattleCommand command,
+    Skill skill = null, InventoryItem item = null)
     {
         if (battleEnded) return;
         if (currentState != BattleState.PlayerCommand) return;
 
         currentState = BattleState.ExecutingTurn;
 
+        int actionSpeed = command == BattleCommand.Defend ? int.MaxValue
+                          : GameManager.Instance.playerStatus.GetEffectiveSpeed() + Random.Range(0, 5);
 
-        StartCoroutine(ExecuteTurn(command));
+        var playerAction = new BattleAction
+        {
+            isPlayer = true,
+            command = command,
+            Skill = skill,
+            speed = actionSpeed,
+            Item = item
+
+        };
+
+        StartCoroutine(ExecuteTurn(playerAction));
     }
 
     private string TryApplyStatus()
@@ -300,64 +379,117 @@ public class BattleManager : MonoBehaviour
         return "";
     }
 
-    private IEnumerator ExecuteTurn(BattleCommand command)
+    private IEnumerator ExecuteTurn(BattleAction playerAction)
     {
-        currentState = BattleState.ExecutingTurn;
         commandPanel.SetActive(false);
 
-        bool playerFirst = CheckPlayerFirst();
-
-        if (playerFirst)
+        var actions = new List<BattleAction>
         {
-            ExecutePlayerAction(command);
-            RefreshUI();
-            if (CheckBattleEnd()) yield break;
+            playerAction,
 
-            yield return new WaitForSeconds(0.5f);
+            new BattleAction(false, BattleCommand.Attack, currentEnemy.speed + Random.Range(0, 5))
+        };
 
-            ExecuteEnemyTurn(true, "");
-            RefreshUI();
-            if (CheckBattleEnd()) yield break;
-        }
-        else
+        actions.Sort((a, b) => b.speed.CompareTo(a.speed));
+
+        for (int i = 0; i < actions.Count; i++)
         {
-            ExecuteEnemyTurn(false, "");
-            RefreshUI();
-            if (CheckBattleEnd()) yield break;
+            BattleAction action = actions[i];
+            if (battleEnded)
+                yield break;
 
-            yield return new WaitForSeconds(0.5f);
+            if (action.isPlayer)
+            {
+                bool canAct = ApplyStatusEffectsAtTurnStart();
 
-            ExecutePlayerAction(command);
+                if (!canAct)
+                {
+                    RefreshUI();
+
+                    yield return new WaitForSeconds(0.5f);
+                    continue;
+                }
+
+                BattleActionResult actionResult = ExecutePlayerAction(action);
+
+                if (!string.IsNullOrEmpty(actionResult.message))
+                {
+                    BattleMessageController messageController =
+                        messageManger.GetComponent<BattleMessageController>();
+
+                    yield return messageController.ShowMessage(actionResult.message);
+                }
+
+
+                switch (actionResult.result)
+                {
+                    case ActionResult.Failed:
+                        currentState = BattleState.PlayerCommand;
+
+                        if (commandPanel != null)
+                        {
+                            commandPanel.SetActive(true);
+                        }
+
+                        yield break;
+
+                    case ActionResult.BattleEnded:
+                        ReturnToDungeon();
+                        yield break;
+
+                    case ActionResult.Success:
+                        break;
+                }
+            }
+            else
+            {
+                ExecuteEnemyTurn(false, "");
+            }
             RefreshUI();
-            if (CheckBattleEnd()) yield break;
+
+            if (CheckBattleEnd())
+                yield break;
+
+            bool hasNextAction = i < actions.Count - 1;
+
+            if (!action.isPlayer && hasNextAction)
+            {
+                yield return new WaitForSeconds(0.5f);
+            }
         }
 
         currentState = BattleState.PlayerCommand;
         commandPanel.SetActive(true);
+
         messageText.text += "\nどうする？";
+
+        isDefending = false;
     }
 
-    private void ExecutePlayerAction(BattleCommand command)
+    private BattleActionResult ExecutePlayerAction(BattleAction action)
     {
-        switch (command)
+        switch (action.command)
         {
             case BattleCommand.Attack:
-                enemyHp -= playerAttack;
-                messageText.text = $"{currentEnemy.name}に{playerAttack}ダメージ！";
-                break;
-            case BattleCommand.Item:
-                messageText.text = "アイテムはまだ未実装！";
-                break;
+                return new BattleActionResult(
+                    ActionResult.Success,
+                    ExecuteAttack()
+                );
+
             case BattleCommand.Skill:
-                messageText.text = "スキルはまだ未実装！";
-                break;
+                return ExecuteSkill(action.Skill);
+
+            case BattleCommand.Item:
+                return ExecuteItem(action.Item);
+
             case BattleCommand.Defend:
-                messageText.text = "防御はまだ未実装！";
-                break;
+                return ExecuteDefend();
+
             case BattleCommand.Escape:
-                messageText.text = "逃げるはまだ未実装！";
-                break;
+                return ExecuteEscape();
         }
+
+        return new BattleActionResult(ActionResult.Failed, "");
     }
 
     private bool ApplyStatusEffectsAtTurnStart()
@@ -397,6 +529,18 @@ public class BattleManager : MonoBehaviour
         return canAct;
     }
 
+    private void ApplyVictoryGrowth()
+    {
+
+        // 戦闘勝利
+        AddGrowth(StatusType.MaxHp, 1);
+
+        // 瀕死を経験して勝利
+        if (reachedCriticalHpThisBattle)
+        {
+            AddGrowth(StatusType.MaxHp, 2);
+        }
+    }
 
     private bool CheckBattleEnd()
     {
@@ -420,7 +564,24 @@ public class BattleManager : MonoBehaviour
         return false;
     }
 
+    private void CheckHpGrowthConditions(int damage)
+    {
 
+        // 一定以上のダメージを受けた
+        if (damage >= GetTotalMaxHp() * 0.2f)
+        {
+            AddGrowth(StatusType.MaxHp, 1);
+        }
+
+        // この戦闘で初めて瀕死になった
+        if (!reachedCriticalHpThisBattle &&
+            playerHp > 0 &&
+            playerHp <= GetTotalMaxHp() * 0.25f)
+        {
+            reachedCriticalHpThisBattle = true;
+            AddGrowth(StatusType.MaxHp, 3);
+        }
+    }
 
     private void ApplyStatusEffectsAfterEnemyAction()
     {
@@ -431,6 +592,156 @@ public class BattleManager : MonoBehaviour
         }
     }
 
+    private string ExecuteAttack()
+    {
+        enemyHp -= playerAttack;
+
+        AddGrowth(
+            StatusType.Strength,
+            1
+        );
+
+        return $"{currentEnemy.name}に{playerAttack}ダメージ！";
+    }
+
+
+    private BattleActionResult ExecuteSkill(Skill skill)
+    {
+        if (skill == null)
+        {
+            return new BattleActionResult(
+                ActionResult.Failed,
+                "スキルが選択されていません！"
+            );
+        }
+
+        if (skill.currentUseCount <= 0)
+        {
+            return new BattleActionResult(
+                ActionResult.Failed,
+                $"{skill.name}はもう使えない！"
+            );
+        }
+
+        skill.currentUseCount--;
+
+        if (skill.isHealSkill)
+        {
+            int beforeHp = playerHp;
+
+            playerHp = Mathf.Min(
+                playerHp + skill.healAmount,
+                GetTotalMaxHp()
+            );
+
+            int actualHealAmount = playerHp - beforeHp;
+
+            return new BattleActionResult(
+                ActionResult.Success,
+                $"{skill.name}！\nHPが{actualHealAmount}回復した！"
+            );
+        }
+
+        int skillDamage = playerAttack * skill.powerMultiplier;
+        enemyHp -= skillDamage;
+
+        return new BattleActionResult(
+            ActionResult.Success,
+            $"{skill.name}！\n" +
+            $"{currentEnemy.name}に{skillDamage}ダメージ！"
+        );
+    }
+
+    private BattleActionResult ExecuteItem(InventoryItem item)
+    {
+        if (item == null || item.count <= 0)
+        {
+            return new BattleActionResult(
+                ActionResult.Failed,
+                "アイテムを持っていない！"
+            );
+        }
+
+        if (!item.isHealItem)
+        {
+            return new BattleActionResult(
+                ActionResult.Failed,
+                "このアイテムは使用できない！"
+            );
+        }
+
+        if (playerHp >= GetTotalMaxHp())
+        {
+            return new BattleActionResult(
+                ActionResult.Failed,
+                "HPは満タンだ！"
+            );
+        }
+
+        int beforeHp = playerHp;
+
+        playerHp = Mathf.Min(
+            playerHp + item.healAmount,
+            GetTotalMaxHp()
+        );
+
+        int actualHealAmount = playerHp - beforeHp;
+
+        item.count--;
+
+        return new BattleActionResult(
+            ActionResult.Success,
+            $"{item.name}を使用した！\n" +
+            $"HPが{actualHealAmount}回復した！"
+        );
+    }
+
+    private BattleActionResult ExecuteDefend()
+    {
+        isDefending = true;
+
+
+        return new BattleActionResult(
+            ActionResult.Success,
+             "身を守っている！"
+        );
+    }
+
+    private BattleActionResult ExecuteEscape()
+    {
+        int speed = GameManager.Instance.playerStatus.GetEffectiveSpeed();
+        int enemySpeed = currentEnemy.speed;
+
+        float escapeRate =
+            0.5f +
+            (speed - enemySpeed) * 0.08f;
+
+        escapeRate = Mathf.Clamp(escapeRate, 0.1f, 0.9f);
+
+        if (Random.value < escapeRate)
+        {
+
+            AddGrowth(
+                StatusType.Speed,
+                2
+            );
+
+            battleEnded = true;
+
+            GameManager.Instance.playerStatus.hp = playerHp;
+
+            return new BattleActionResult(
+             ActionResult.BattleEnded,
+              "逃げ出した！"
+            );
+        }
+
+
+        return new BattleActionResult(
+             ActionResult.Success,
+              "逃げられなかった！"
+            );
+    }
     //public void RunAway()
     //{
     //    if (battleEnded) return;
@@ -527,68 +838,31 @@ public class BattleManager : MonoBehaviour
 
     public void UsePowerStrike()
     {
-        UseSkill(skills.Find(s => s.name == "パワーストライク"));
+        SelectSkill(skills[0]);
+        if (skillPanel != null)
+        {
+            skillPanel.SetActive(false);
+        }
     }
 
     public void UseHealSkill()
     {
-        UseSkill(skills.Find(s => s.name == "ヒール"));
+        SelectSkill(skills[1]);
+        if (skillPanel != null)
+        {
+            skillPanel.SetActive(false);
+        }
     }
 
-    private void UseSkill(Skill skill)
+    private void AddGrowth(StatusType type, int amount)
     {
-        if (battleEnded) return;
+        GrowthResult result =
+            GameManager.Instance.playerStatus.AddGrowth(type, amount);
 
-        if (skill == null)
+        if (result.grew)
         {
-            return;
+            growthResults.Add(result);
         }
-
-        messageText.text = "";
-
-        bool canAct = ApplyStatusEffectsAtTurnStart();
-
-        if (!canAct)
-        {
-            ExecuteEnemyTurn(false, $"{skill.name}を使えなかった！");
-            return;
-        }
-
-        if (skill.currentUseCount <= 0)
-        {
-            messageText.text = $"{skill.name}はもう使えない！";
-            return;
-        }
-
-        if (skill.isHealSkill)
-        {
-            playerHp += skill.healAmount;
-            if (playerHp > GetTotalMaxHp())
-            {
-                playerHp = GetTotalMaxHp();
-            }
-
-            messageText.text += $"{skill.name}！\nHPが{skill.healAmount}回復した！";
-        }
-        else
-        {
-            int skillDamage = playerAttack * skill.powerMultiplier;
-            enemyHp -= skillDamage;
-
-            messageText.text += $"{skill.name}！\n{currentEnemy.name}に{skillDamage}ダメージ！";
-
-            if (enemyHp <= 0)
-            {
-                enemyHp = 0;
-                RefreshUI();
-                WinBattle();
-                return;
-            }
-        }
-
-        skill.currentUseCount--;
-
-        ExecuteEnemyTurn(true, "");
     }
 
     #endregion
@@ -689,7 +963,27 @@ public class BattleManager : MonoBehaviour
         if (!didHeal)
         {
             damage = CalculateEnemyDamage(out msg);
-            playerHp -= damage;
+
+            if (isDefending)
+            {
+                damage = Mathf.Max(1, damage / 2);
+                AddGrowth(
+                    StatusType.Vitality,
+                    2
+                );
+
+            }
+            else
+            {
+                AddGrowth(
+                    StatusType.Vitality,
+                    1
+                );
+            }
+
+
+                playerHp -= damage;
+            CheckHpGrowthConditions(damage);
         }
 
         string statusMsg = TryApplyStatus();
@@ -749,7 +1043,7 @@ public class BattleManager : MonoBehaviour
     #region システム処理
     private bool CheckPlayerFirst()
     {
-        int playerSpeed = GameManager.Instance.playerStatus.speed;
+        int playerSpeed = GameManager.Instance.playerStatus.GetEffectiveSpeed();
         int enemySpeed = currentEnemy.speed;
 
         int playerRoll = playerSpeed + Random.Range(0, 5);
@@ -760,46 +1054,76 @@ public class BattleManager : MonoBehaviour
         return playerRoll >= enemyRoll;
     }
 
+    private string GetGrowthResultMessage()
+    {
+        if (growthResults.Count == 0)
+        {
+            return "";
+        }
+
+        string message = "\n\n能力が成長した！";
+
+        var groupedResults = growthResults
+            .GroupBy(result => result.type)
+            .Select(group => new
+            {
+                Type = group.Key,
+                Amount = group.Sum(result => result.amount)
+            });
+
+        foreach (var result in groupedResults)
+        {
+            string statusName = result.Type switch
+            {
+                StatusType.MaxHp => "最大HP",
+                StatusType.Strength => "筋力",
+                StatusType.Vitality => "体力",
+                StatusType.Speed => "素早さ",
+                StatusType.Dexterity => "器用さ",
+                StatusType.Intelligence => "知力",
+                StatusType.Luck => "運",
+                _ => result.Type.ToString()
+            };
+
+            message += $"\n{statusName}が{result.Amount}上がった！";
+        }
+
+        return message;
+    }
+
     private void WinBattle()
     {
         battleEnded = true;
 
-        messageText.text = $"{currentEnemy.name}を倒した！\n{currentEnemy.exp}経験値と{currentEnemy.gold}Gを手に入れた！";
+        StartCoroutine(WinBattleRoutine());
+    }
+
+    private IEnumerator WinBattleRoutine()
+    {
+        string message = "";
+
+        ApplyVictoryGrowth();
+
+        message =
+            $"{currentEnemy.name}を倒した！\n" +
+            $"{currentEnemy.gold}Gを手に入れた！";
 
         if (GameManager.Instance != null)
         {
             GameManager.Instance.playerStatus.hp = playerHp;
             GameManager.Instance.playerExp += currentEnemy.exp;
             GameManager.Instance.playerGold += currentEnemy.gold;
-            CheckLevelUp();
+
         }
 
-        //Invoke(nameof(ReturnToDungeon), 2.5f);
-        EndBattle(true);
-    }
+        message += GetGrowthResultMessage();
 
-    private void CheckLevelUp()
-    {
-        if (GameManager.Instance == null) return;
+        BattleMessageController messageController =
+            messageManger.GetComponent<BattleMessageController>();
 
-        while (GameManager.Instance.playerExp >= GameManager.Instance.nextExp)
-        {
-            GameManager.Instance.playerExp -= GameManager.Instance.nextExp;
-            GameManager.Instance.playerStatus.level += 1;
+        yield return messageController.ShowMessage(message, 3.0f);
 
-            int hpUp = 5;
-            int atkUp = 1;
-
-            GameManager.Instance.nextExp += 5;
-            GameManager.Instance.playerStatus.maxHp += hpUp;
-            GameManager.Instance.playerStatus.attack += atkUp;
-            GameManager.Instance.playerStatus.hp = GameManager.Instance.playerStatus.maxHp;
-
-            messageText.text +=
-                $"\nレベルアップ！" +
-                $"\nHP +{hpUp}" +
-                $"\n攻撃 +{atkUp}";
-        }
+        ReturnToDungeon();
     }
 
 
@@ -811,9 +1135,18 @@ public class BattleManager : MonoBehaviour
         {
             levelText.text = $"Lv: {GameManager.Instance.playerStatus.level}";
             expText.text = $"EXP: {GameManager.Instance.playerExp}/{GameManager.Instance.nextExp}";
-            potionText.text = $"Potion: {GameManager.Instance.potionCount}";
+            
             weaponText.text = $"武器: {GameManager.Instance.weaponName} (+{GameManager.Instance.weaponPower})";
             armorText.text = $"防具: {GameManager.Instance.armorName} (+HP {GameManager.Instance.armorHpBonus})";
+
+            var potion = GameManager.Instance.playerStatus.inventory .FirstOrDefault(x => x.id == "potion");
+
+            int potionCount = potion?.count ?? 0;
+
+            potionText.text = $"Potion: {potionCount}";
+
+
+            GameManager.Instance.playerStatus.hp = playerHp;
         }
 
         StatusText.text = "";
@@ -836,7 +1169,6 @@ public class BattleManager : MonoBehaviour
             }
         }
 
-        GameManager.Instance.playerStatus.hp = playerHp;
     }
 
     private int GetTotalMaxHp()
@@ -867,15 +1199,14 @@ public class BattleManager : MonoBehaviour
     {
         if (isWin)
         {
-            Invoke(nameof(ReturnToDungeon), 2.5f);
+            Invoke(nameof(ReturnToDungeon), 4.0f);
         }
         else
         {
             Invoke(nameof(HandleDefeat), 2.5f);
-
-
         }
     }
+
 
     private void HandleDefeat()
     {

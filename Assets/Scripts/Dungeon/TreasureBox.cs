@@ -82,7 +82,7 @@ public class TreasureBox : MonoBehaviour
                 break;
             case TreasureType.Trap:
                 int damage = Random.Range(1, 10)
-                            - GameManager.Instance.playerStatus.defense
+                            - GameManager.Instance.playerStatus.GetDefensePower(GameManager.Instance.armorHpBonus)
                             - luck / 2;
 
                 damage = Mathf.Max(0, damage);
