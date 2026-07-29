@@ -31,6 +31,7 @@ public class GrowthResult
 [System.Serializable]
 public class PlayerStatus
 {
+    public string playerName = "";
     public int level = 1;
     public int maxHp = 20;
     public int hp = 20;
@@ -43,9 +44,32 @@ public class PlayerStatus
     public int intelligence = 1;
     public int luck = 1;
 
+    public string backgroundId = "";
+    public string backgroundName = "";
+
     public GrowthPoints growth = new GrowthPoints();
 
     public float maxCarryWeight = 30f;
+
+    public List<Skill> skills = new List<Skill>()
+{
+    new Skill(
+        "power_strike",
+        "パワーストライク",
+        2,
+        0,
+        false,
+        3
+    ),
+    new Skill(
+        "heal",
+        "ヒール",
+        0,
+        15,
+        true,
+        2
+    )
+};
 
     public List<InventoryItem> inventory = new List<InventoryItem>() {
         new InventoryItem{

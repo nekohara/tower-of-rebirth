@@ -67,6 +67,9 @@
     <Compile Include="Assets\Scripts\Dungeon\DungeonExit.cs" />
     <Compile Include="Assets\Scripts\Dungeon\DungeonGenerator.cs" />
     <Compile Include="Assets\Scripts\Dungeon\TreasureBox.cs" />
+    <Compile Include="Assets\Scripts\UI\PrologueController.cs" />
+    <Compile Include="Assets\Scripts\UI\GuildDialogueController.cs" />
+    <Compile Include="Assets\Scripts\Data\Skill.cs" />
     <Compile Include="Assets\Scripts\Dungeon\FadeController.cs" />
     <Compile Include="Assets\Scripts\Battle\BattleManager.cs" />
     <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
@@ -75,6 +78,7 @@
     <Compile Include="Assets\Scripts\Dungeon\DungeonPlayerRestore.cs" />
     <Compile Include="Assets\Scripts\Data\Item.cs" />
     <Compile Include="Assets\Scripts\Data\Armor.cs" />
+    <Compile Include="Assets\Scripts\Core\PlayerCreationController.cs" />
     <Compile Include="Assets\Scripts\Core\GameManager.cs" />
     <Compile Include="Assets\Scripts\Town\TownManager.cs" />
     <Compile Include="Assets\Scripts\Dungeon\DungeonManager.cs" />

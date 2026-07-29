@@ -5,6 +5,7 @@ using System.Xml.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class BattleManager : MonoBehaviour
 {
@@ -76,28 +77,6 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    [System.Serializable]
-    public class Skill
-    {
-        // powerMultiplier: 攻撃倍率
-        // healAmount: 回復量
-        // isHealSkill: 回復スキルかどうか
-        public string name;
-        public int powerMultiplier;
-        public int healAmount;
-        public bool isHealSkill;
-        public int maxUseCount;
-        public int currentUseCount;
-
-        public Skill(string name, int powerMultiplier, int healAmount, bool isHealSkill)
-        {
-            this.name = name;
-            this.powerMultiplier = powerMultiplier;
-            this.healAmount = healAmount;
-            this.isHealSkill = isHealSkill;
-        }
-    }
-
     private class BattleAction
     {
         public bool isPlayer;
@@ -144,6 +123,11 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private GameObject commandPanel;
     [SerializeField] private GameObject skillPanel;
     [SerializeField] private GameObject messageManger;
+    [SerializeField] private Transform skillButtonContainer;
+    [SerializeField] private GameObject skillButtonPrefab;
+    [SerializeField] private GameObject itemPanel;
+    [SerializeField] private Transform itemButtonContainer;
+    [SerializeField] private GameObject itemButtonPrefab;
 
     private int playerHp;
     private int playerAttack;
@@ -262,8 +246,94 @@ public class BattleManager : MonoBehaviour
 
         if (commandPanel != null) commandPanel.SetActive(false);
         if (skillPanel != null) skillPanel.SetActive(false);
+        if (itemPanel != null) itemPanel.SetActive(false);
 
         StartCoroutine(EnemyFirstRoutine());
+    }
+
+    private void BuildSkillButtons()
+    {
+        foreach (Transform child in skillButtonContainer)
+        {
+            Destroy(child.gameObject);
+        }
+
+        foreach (Skill skill in skills)
+        {
+            GameObject buttonObject = Instantiate(
+                skillButtonPrefab,
+                skillButtonContainer
+            );
+
+            Button button = buttonObject.GetComponent<Button>();
+
+            TMP_Text buttonText =
+                buttonObject.GetComponentInChildren<TMP_Text>();
+
+            if (buttonText != null)
+            {
+                buttonText.text =
+                    $"{skill.name}  {skill.currentUseCount}/{skill.maxUseCount}";
+            }
+
+            Skill selectedSkill = skill;
+
+            button.onClick.AddListener(() =>
+            {
+                SelectSkill(selectedSkill);
+
+                if (skillPanel != null)
+                {
+                    skillPanel.SetActive(false);
+                }
+            });
+        }
+    }
+
+    private void BuildItemButtons()
+    {
+        foreach (Transform child in itemButtonContainer)
+        {
+            Destroy(child.gameObject);
+        }
+
+        IEnumerable<InventoryItem> ownedItems =
+            GameManager.Instance.playerStatus.inventory
+                .Where(item => item.count > 0);
+
+        foreach (InventoryItem item in ownedItems)
+        {
+            GameObject buttonObject = Instantiate(
+                itemButtonPrefab,
+                itemButtonContainer
+            );
+
+            Button button = buttonObject.GetComponent<Button>();
+
+            TMP_Text buttonText =
+                buttonObject.GetComponentInChildren<TMP_Text>();
+
+            if (buttonText != null)
+            {
+                buttonText.text = $"{item.name} ×{item.count}";
+            }
+
+            InventoryItem selectedItem = item;
+
+            button.onClick.AddListener(() =>
+            {
+                SelectCommand(
+                    BattleCommand.Item,
+                    null,
+                    selectedItem
+                );
+
+                if (itemPanel != null)
+                {
+                    itemPanel.SetActive(false);
+                }
+            });
+        }
     }
 
 
@@ -284,19 +354,35 @@ public class BattleManager : MonoBehaviour
         StatusText.text = "";
 
     }
-
     private void InitializeSkills()
     {
-        Skill powerStrike = new Skill("パワーストライク", 2, 0, false);
-        powerStrike.maxUseCount = 3;
-        powerStrike.currentUseCount = 3;
+        skills = GameManager.Instance.playerStatus.skills;
 
-        Skill healSkill = new Skill("ヒール", 0, 15, true);
-        healSkill.maxUseCount = 2;
-        healSkill.currentUseCount = 2;
+        if (skills.Count == 0)
+        {
+            skills.Add(new Skill(
+                "power_strike",
+                "パワーストライク",
+                2,
+                0,
+                false,
+                3
+            ));
 
-        skills.Add(powerStrike);
-        skills.Add(healSkill); 
+            skills.Add(new Skill(
+                "heal",
+                "ヒール",
+                0,
+                15,
+                true,
+                2
+            ));
+        }
+
+        foreach (Skill skill in skills)
+        {
+            skill.currentUseCount = skill.maxUseCount;
+        }
     }
 
     #endregion
@@ -309,12 +395,24 @@ public class BattleManager : MonoBehaviour
 
     }
 
-    public void Heal()
+    public void OpenItemPanel()
     {
-        var potion = GameManager.Instance.playerStatus.inventory
-        .FirstOrDefault(x => x.id == "potion" && x.count > 0);
+        BuildItemButtons();
 
-        SelectCommand(BattleCommand.Item, null, potion);
+        if (commandPanel != null)
+            commandPanel.SetActive(false);
+
+        if (itemPanel != null)
+            itemPanel.SetActive(true);
+    }
+
+    public void CloseItemPanel()
+    {
+        if (itemPanel != null)
+            itemPanel.SetActive(false);
+
+        if (commandPanel != null)
+            commandPanel.SetActive(true);
     }
 
     public void RunAway()
@@ -395,6 +493,8 @@ public class BattleManager : MonoBehaviour
         for (int i = 0; i < actions.Count; i++)
         {
             BattleAction action = actions[i];
+            bool hasNextAction = i < actions.Count - 1;
+
             if (battleEnded)
                 yield break;
 
@@ -443,19 +543,29 @@ public class BattleManager : MonoBehaviour
             }
             else
             {
-                ExecuteEnemyTurn(false, "");
+                string enemyMessage = ExecuteEnemyTurn(false, "");
+
+                if (hasNextAction && !battleEnded)
+                {
+                    BattleMessageController messageController =
+                        messageManger.GetComponent<BattleMessageController>();
+
+                    yield return messageController.ShowMessage(enemyMessage, 0.5f);
+                }
+                else
+                {
+                    messageText.text = enemyMessage;
+                }
             }
+
             RefreshUI();
+
+            if (battleEnded)
+                yield break;
 
             if (CheckBattleEnd())
                 yield break;
 
-            bool hasNextAction = i < actions.Count - 1;
-
-            if (!action.isPlayer && hasNextAction)
-            {
-                yield return new WaitForSeconds(0.5f);
-            }
         }
 
         currentState = BattleState.PlayerCommand;
@@ -583,13 +693,15 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    private void ApplyStatusEffectsAfterEnemyAction()
+    private string ApplyStatusEffectsAfterEnemyAction()
     {
         if (playerStatus.Contains(StatusEffect.Poison))
         {
             playerHp -= poisonDamage;
-            messageText.text += $"\n毒で{poisonDamage}ダメージ受けた！";
+            return $"\n毒で{poisonDamage}ダメージ受けた！";
         }
+
+        return "";
     }
 
     private string ExecuteAttack()
@@ -742,117 +854,7 @@ public class BattleManager : MonoBehaviour
               "逃げられなかった！"
             );
     }
-    //public void RunAway()
-    //{
-    //    if (battleEnded) return;
-
-    //    int speed = GameManager.Instance.playerStatus.speed;
-    //    int enemySpeed = currentEnemy.speed;
-
-    //    float escapeRate =
-    //        0.5f +
-    //        (speed - enemySpeed) * 0.08f;
-
-    //    escapeRate = Mathf.Clamp(escapeRate, 0.1f, 0.9f);
-
-    //    if (Random.value < escapeRate)
-    //    {
-
-    //        battleEnded = true;
-    //        messageText.text = "逃げ出した！";
-    //        Invoke(nameof(ReturnToDungeon), 1.0f);
-    //        if (GameManager.Instance != null)
-    //        {
-    //            GameManager.Instance.playerStatus.hp = playerHp;
-    //        }
-
-    //    }
-    //    else
-    //    {
-    //        messageText.text = "逃げられなかった！";
-    //        ExecuteEnemyTurn(false, "");
-    //    }
-    //}
-
-    //public void Heal()
-    //{
-    //    if (battleEnded) return;
-
-    //    if (GameManager.Instance != null && GameManager.Instance.potionCount > 0)
-    //    {
-    //        int healAmount = 10;
-
-    //        playerHp += healAmount;
-    //        if (playerHp > GetTotalMaxHp())
-    //        {
-    //            playerHp = GetTotalMaxHp();
-    //        }
-
-    //        GameManager.Instance.potionCount--;
-
-    //        messageText.text = $"ポーション使用！{healAmount}回復した！";
-
-    //        messageText.text += $"\n{currentEnemy.name}の反撃！";
-
-
-    //        string msg = "";
-
-    //        int damage = CalculateEnemyDamage(out msg);
-
-
-    //        // 敵の反撃
-    //        playerHp -= damage;
-
-    //        messageText.text += msg;
-
-    //        messageText.text += $"\n{damage}ダメージ！";
-
-
-    //        string poisonMsg = TryApplyStatus();
-    //        messageText.text += poisonMsg;
-
-    //        ApplyStatusEffectsAfterEnemyAction();
-
-
-    //        if (GameManager.Instance != null)
-    //        {
-    //            GameManager.Instance.playerStatus.hp = playerHp;
-    //        }
-
-    //        if (playerHp <= 0)
-    //        {
-    //            playerHp = 0;
-    //            battleEnded = true;
-    //            messageText.text += "\nやられてしまった…";
-    //            EndBattle(false);
-    //            return;
-    //        }
-
-    //        RefreshUI();
-    //    }
-    //    else
-    //    {
-    //        messageText.text = "ポーションがない！";
-    //    }
-    //}
-
-    public void UsePowerStrike()
-    {
-        SelectSkill(skills[0]);
-        if (skillPanel != null)
-        {
-            skillPanel.SetActive(false);
-        }
-    }
-
-    public void UseHealSkill()
-    {
-        SelectSkill(skills[1]);
-        if (skillPanel != null)
-        {
-            skillPanel.SetActive(false);
-        }
-    }
+  
 
     private void AddGrowth(StatusType type, int amount)
     {
@@ -884,47 +886,70 @@ public class BattleManager : MonoBehaviour
             yield break;
         }
 
-        if (commandPanel != null) commandPanel.SetActive(false);
+        if (commandPanel != null)
+        {
+            commandPanel.SetActive(false);
+        }
+
+        string encounterMessage;
 
         if (currentEnemy.speed >= 10)
         {
-            messageText.text = $"{currentEnemy.name}が電光石火で襲いかかってきた！";
+            encounterMessage =
+                $"{currentEnemy.name}が電光石火で襲いかかってきた！";
         }
         else if (currentEnemy.speed >= 5)
         {
-            messageText.text = $"{currentEnemy.name}が素早く動いた！";
+            encounterMessage =
+                $"{currentEnemy.name}が素早く動いた！";
         }
         else
         {
-            messageText.text = $"{currentEnemy.name}が動き出した！";
+            encounterMessage =
+                $"{currentEnemy.name}が動き出した！";
         }
-        yield return new WaitForSeconds(1.0f);
 
-        ExecuteEnemyTurn(false, "");
+        BattleMessageController messageController =
+            messageManger.GetComponent<BattleMessageController>();
 
-        if (!battleEnded && commandPanel != null)
+        yield return messageController.ShowMessage(encounterMessage, 1.0f);
+
+        string enemyMessage = ExecuteEnemyTurn(false, "");
+        messageText.text = enemyMessage;
+
+        if (battleEnded)
         {
-            currentState = BattleState.PlayerCommand;
+            yield break;
+        }
+
+        currentState = BattleState.PlayerCommand;
+
+        if (commandPanel != null)
+        {
             commandPanel.SetActive(true);
         }
+
+        messageText.text += "\nどうする？";
     }
 
 
-    private bool TryEnemyHeal()
+    private bool TryEnemyHeal(out string healMessage)
     {
-        if (currentEnemy.type != EnemyType.Heal) return false;
+        healMessage = "";
+
+        if (currentEnemy.type != EnemyType.Heal)
+            return false;
 
         if (enemyHp < enemyMaxHp * 0.5f)
         {
-            int heal = Random.Range(3, (int)(enemyHealAmount * 1.5f) + 1);
-            enemyHp += heal;
+            int heal = Random.Range(
+                3,
+                (int)(enemyHealAmount * 1.5f) + 1
+            );
 
-            if (enemyHp > enemyMaxHp)
-            {
-                enemyHp = enemyMaxHp;
-            }
+            enemyHp = Mathf.Min(enemyHp + heal, enemyMaxHp);
 
-            messageText.text += $"\n{currentEnemy.name}は回復した！(+{heal})";
+            healMessage = $"{currentEnemy.name}は回復した！(+{heal})";
             return true;
         }
 
@@ -953,9 +978,16 @@ public class BattleManager : MonoBehaviour
     }
 
 
-    private void ExecuteEnemyTurn(bool acted, string prefixMessage)
+    private string ExecuteEnemyTurn(bool acted, string prefixMessage)
     {
-        bool didHeal = TryEnemyHeal();
+        string resultMessage = "";
+
+        bool didHeal = TryEnemyHeal(out string healMessage);
+
+        if (didHeal)
+        {
+            resultMessage += $"{healMessage}";
+        }
 
         string msg = "";
         int damage = 0;
@@ -990,33 +1022,34 @@ public class BattleManager : MonoBehaviour
 
         if (prefixMessage != "")
         {
-            if (messageText.text != "") messageText.text += "\n";
-            messageText.text += prefixMessage;
+            if (resultMessage  != "") resultMessage += "\n";
+            resultMessage += prefixMessage;
         }
 
         if (!didHeal)
         {
             if (acted)
             {
-                messageText.text += $"\n{currentEnemy.name}の反撃！";
+                resultMessage += $"{currentEnemy.name}の反撃！";
             }
             else
             {
-                messageText.text += $"\n{currentEnemy.name}の攻撃！";
+                resultMessage += $"{currentEnemy.name}の攻撃！";
             }
 
-            messageText.text += msg;
-            messageText.text += $"\n{damage}ダメージ！";
+            resultMessage += msg;
+            resultMessage += $"\n{damage}ダメージ！";
         }
 
-        messageText.text += statusMsg;
+        resultMessage += statusMsg;
 
-        ApplyStatusEffectsAfterEnemyAction();
+        string afterStatusMsg = ApplyStatusEffectsAfterEnemyAction();
+        resultMessage += afterStatusMsg;
 
         if (playerStatus.Contains(StatusEffect.Sleep) && damage > 0)
         {
             playerStatus.Remove(StatusEffect.Sleep);
-            messageText.text += "\n痛みで目を覚ました！";
+            resultMessage += "\n痛みで目を覚ました！";
         }
 
         if (playerHp <= 0)
@@ -1024,7 +1057,7 @@ public class BattleManager : MonoBehaviour
             playerHp = 0;
             battleEnded = true;
             RefreshUI();
-            messageText.text += "やられてしまった…";
+            resultMessage += "\nやられてしまった…";
             //Invoke(nameof(ReturnToDungeon), 1.5f);
 
             EndBattle(false);
@@ -1033,10 +1066,11 @@ public class BattleManager : MonoBehaviour
             //{
             //    GameManager.Instance.playerHp = playerHp;
             //}
-            return;
+            return resultMessage;
         }
 
         RefreshUI();
+        return resultMessage;
     }
     #endregion
 
@@ -1185,8 +1219,13 @@ public class BattleManager : MonoBehaviour
 
     public void OpenSkillPanel()
     {
-        if (commandPanel != null) commandPanel.SetActive(false);
-        if (skillPanel != null) skillPanel.SetActive(true);
+        BuildSkillButtons();
+
+        if (commandPanel != null)
+            commandPanel.SetActive(false);
+
+        if (skillPanel != null)
+            skillPanel.SetActive(true);
     }
 
     public void CloseSkillPanel()
