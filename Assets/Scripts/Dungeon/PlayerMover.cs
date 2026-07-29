@@ -93,44 +93,107 @@ public class PlayerMover : MonoBehaviour
     }
     private void HandleInput()
     {
-        if (Keyboard.current == null || dungeonGenerator == null) return;
-
-        if (Keyboard.current.wKey.wasPressedThisFrame || Keyboard.current.upArrowKey.wasPressedThisFrame)
+        if (dungeonGenerator == null)
         {
-            TryMove(transform.forward);
-        }
-        else if (Keyboard.current.sKey.wasPressedThisFrame || Keyboard.current.downArrowKey.wasPressedThisFrame)
-        {
-            TryMove(-transform.forward);
-        }
-        else if (Keyboard.current.aKey.wasPressedThisFrame || Keyboard.current.leftArrowKey.wasPressedThisFrame)
-        {
-            targetRotation = transform.rotation * Quaternion.Euler(0, -90, 0);
-            isRotating = true;
-            isMoving = true;
-        }
-        else if (Keyboard.current.dKey.wasPressedThisFrame || Keyboard.current.rightArrowKey.wasPressedThisFrame)
-        {
-            targetRotation = transform.rotation * Quaternion.Euler(0, 90, 0);
-            isRotating = true;
-            isMoving = true;
+            return;
         }
 
-        if (Keyboard.current.spaceKey.wasPressedThisFrame)
+        if (Keyboard.current != null)
         {
-            Vector3 forwardDir = new Vector3(transform.forward.x, 0f, transform.forward.z).normalized;
-            Vector3 checkPos = transform.position + forwardDir * moveDistance;
-
-            Collider[] hits = Physics.OverlapSphere(checkPos, 0.4f);
-
-            foreach (var hit in hits)
+            if (Keyboard.current.wKey.wasPressedThisFrame ||
+                Keyboard.current.upArrowKey.wasPressedThisFrame)
             {
-                TreasureBox box = hit.GetComponentInParent<TreasureBox>();
-                if (box != null)
-                {
-                    box.Open();
-                    break;
-                }
+                TryMove(transform.forward);
+                return;
+            }
+
+            if (Keyboard.current.sKey.wasPressedThisFrame ||
+                Keyboard.current.downArrowKey.wasPressedThisFrame)
+            {
+                TryMove(-transform.forward);
+                return;
+            }
+
+            if (Keyboard.current.aKey.wasPressedThisFrame ||
+                Keyboard.current.leftArrowKey.wasPressedThisFrame)
+            {
+                StartRotation(-90f);
+                return;
+            }
+
+            if (Keyboard.current.dKey.wasPressedThisFrame ||
+                Keyboard.current.rightArrowKey.wasPressedThisFrame)
+            {
+                StartRotation(90f);
+                return;
+            }
+
+            if (Keyboard.current.spaceKey.wasPressedThisFrame)
+            {
+                InteractWithFrontObject();
+                return;
+            }
+        }
+
+        if (Mouse.current != null)
+        {
+            if (Mouse.current.leftButton.wasPressedThisFrame)
+            {
+                TryMove(transform.forward);
+                return;
+            }
+
+            float scrollY = Mouse.current.scroll.ReadValue().y;
+
+            if (scrollY > 0f)
+            {
+                StartRotation(90f);
+                return;
+            }
+
+            if (scrollY < 0f)
+            {
+                StartRotation(-90f);
+                return;
+            }
+
+            if (Mouse.current.rightButton.wasPressedThisFrame)
+            {
+                InteractWithFrontObject();
+            }
+        }
+    }
+
+    private void StartRotation(float angle)
+    {
+        targetRotation =
+            transform.rotation * Quaternion.Euler(0f, angle, 0f);
+
+        isRotating = true;
+        isMoving = true;
+    }
+
+    private void InteractWithFrontObject()
+    {
+        Vector3 forwardDir = new Vector3(
+            transform.forward.x,
+            0f,
+            transform.forward.z
+        ).normalized;
+
+        Vector3 checkPos =
+            transform.position + forwardDir * moveDistance;
+
+        Collider[] hits = Physics.OverlapSphere(checkPos, 0.4f);
+
+        foreach (Collider hit in hits)
+        {
+            TreasureBox box = hit.GetComponentInParent<TreasureBox>();
+
+            if (box != null)
+            {
+                box.Open();
+                return;
             }
         }
     }
