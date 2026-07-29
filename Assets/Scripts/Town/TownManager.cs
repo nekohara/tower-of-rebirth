@@ -117,6 +117,11 @@ public class TownManager : MonoBehaviour
         BuyArmor(armors[1]);
     }
 
+    public void OnClickDungeon()
+    {
+        SceneLoader.Instance.LoadDungeon();
+    }
+
     private void BuyArmor(Armor armor)
     {
         if (GameManager.Instance == null) return;
