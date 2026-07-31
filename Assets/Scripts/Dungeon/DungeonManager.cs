@@ -52,4 +52,12 @@ public class DungeonManager : MonoBehaviour
         return GameManager.Instance.playerStatus.maxHp + GameManager.Instance.armorHpBonus;
     }
 
+
+    [SerializeField]
+    private GameObject instructionPanel;
+
+    public void ToggleInstructionPanel()
+    {
+        instructionPanel.SetActive(!instructionPanel.activeSelf);
+    }
 }
