@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
 
 public class PlayerMover : MonoBehaviour
 {
@@ -101,11 +102,12 @@ public class PlayerMover : MonoBehaviour
         if (Keyboard.current != null)
         {
             if (Keyboard.current.wKey.wasPressedThisFrame ||
-                Keyboard.current.upArrowKey.wasPressedThisFrame)
+                 Keyboard.current.upArrowKey.wasPressedThisFrame)
             {
                 TryMove(transform.forward);
                 return;
             }
+
 
             if (Keyboard.current.sKey.wasPressedThisFrame ||
                 Keyboard.current.downArrowKey.wasPressedThisFrame)
@@ -137,7 +139,12 @@ public class PlayerMover : MonoBehaviour
 
         if (Mouse.current != null)
         {
-            if (Mouse.current.leftButton.wasPressedThisFrame)
+            bool isPointerOverUI =
+                EventSystem.current != null &&
+                EventSystem.current.IsPointerOverGameObject();
+
+            if (Mouse.current.leftButton.wasPressedThisFrame &&
+                !isPointerOverUI)
             {
                 TryMove(transform.forward);
                 return;
