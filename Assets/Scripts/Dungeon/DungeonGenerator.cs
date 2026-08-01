@@ -1,18 +1,19 @@
 using UnityEngine;
+using System.Collections.Generic;
 using static TreasureBox;
 
 public class DungeonGenerator : MonoBehaviour
 {
     [SerializeField] private GameObject floorPrefab;
     [SerializeField] private GameObject wallPrefab;
+    [SerializeField] private GameObject chestPrefab;
+    [SerializeField] private GameObject exitPrefab;
     [SerializeField] private Transform dungeonRoot;
     [SerializeField] private float tileSize = 2f;
     [SerializeField] private float wallHeight = 2f;
     [SerializeField] private Vector2Int startPosition = new Vector2Int(1, 1);
     [SerializeField] private int width = 15;
     [SerializeField] private int height = 15;
-    [SerializeField] private GameObject chestPrefab;
-    [SerializeField] private int treasureCount = 5;
 
     public Vector2Int StartPosition => startPosition;
 
@@ -148,6 +149,10 @@ public class DungeonGenerator : MonoBehaviour
         map[startPosition.y, startPosition.x] = 0;
         map[startPosition.y, startPosition.x + 1] = 0;
 
+        // 出口を配置してから宝箱を配置する
+        PlaceExit();
+
+        int treasureCount = Random.Range(1, 3);
         int placed = 0;
         int safety = 0;
 
@@ -158,11 +163,16 @@ public class DungeonGenerator : MonoBehaviour
             int chestX = Random.Range(1, width - 1);
             int chestZ = Random.Range(1, height - 1);
 
+            // 通路以外には配置しない
+            // これにより、開始地点・出口・ほかの宝箱も除外される
             if (map[chestZ, chestX] != 0)
                 continue;
 
-            if (chestX == startPosition.x && chestZ == startPosition.y)
+            if (chestX == startPosition.x &&
+                chestZ == startPosition.y)
+            {
                 continue;
+            }
 
             map[chestZ, chestX] = 2;
             placed++;
@@ -180,42 +190,71 @@ public class DungeonGenerator : MonoBehaviour
         {
             for (int x = 0; x < width; x++)
             {
-                Vector3 basePos = new Vector3(x * tileSize, 0, z * tileSize);
+                int tileType = map[z, x];
 
-                if (map[z, x] == 0 || map[z, x] == 2)
+                if (tileType != 0 &&
+                    tileType != 2 &&
+                    tileType != 3)
                 {
-                    Instantiate(floorPrefab, basePos, Quaternion.identity, dungeonRoot);
+                    continue;
+                }
 
-                    CreateWallIfNeeded(x, z, 0, -1, basePos, Vector3.back);
-                    CreateWallIfNeeded(x, z, 0, 1, basePos, Vector3.forward);
-                    CreateWallIfNeeded(x, z, -1, 0, basePos, Vector3.left);
-                    CreateWallIfNeeded(x, z, 1, 0, basePos, Vector3.right);
+                Vector3 basePos =
+                    new Vector3(x * tileSize, 0, z * tileSize);
 
-                    if (map[z, x] == 2)
-                    {
-                        GameObject chest = Instantiate(chestPrefab, basePos + Vector3.up * 0.5f, Quaternion.identity, dungeonRoot);
+                Instantiate(
+                    floorPrefab,
+                    basePos,
+                    Quaternion.identity,
+                    dungeonRoot);
 
-                        TreasureBox box = chest.GetComponent<TreasureBox>();
+                CreateWallIfNeeded(x, z, 0, -1, basePos, Vector3.back);
+                CreateWallIfNeeded(x, z, 0, 1, basePos, Vector3.forward);
+                CreateWallIfNeeded(x, z, -1, 0, basePos, Vector3.left);
+                CreateWallIfNeeded(x, z, 1, 0, basePos, Vector3.right);
 
-                        int rand = Random.Range(0, 100);
-
-                        if (rand < 60)
-                        {
-                            box.SetTreasureType(TreasureType.Potion);
-                        }
-                        else if (rand < 90)
-                        {
-                            box.SetTreasureType(TreasureType.Gold);
-                        }
-                        else
-                        {
-                            box.SetTreasureType(TreasureType.Trap);
-                        }
-                    }
+                if (tileType == 2)
+                {
+                    CreateTreasureBox(basePos);
+                }
+                else if (tileType == 3)
+                {
+                    Instantiate(
+                        exitPrefab,
+                        basePos + Vector3.up * 0.5f,
+                        Quaternion.identity,
+                        dungeonRoot);
                 }
             }
         }
     }
+
+    private void CreateTreasureBox(Vector3 basePos)
+    {
+        GameObject chest = Instantiate(
+            chestPrefab,
+            basePos,
+            Quaternion.identity,
+            dungeonRoot);
+
+        TreasureBox box = chest.GetComponent<TreasureBox>();
+
+        int rand = Random.Range(0, 100);
+
+        if (rand < 60)
+        {
+            box.SetTreasureType(TreasureType.Potion);
+        }
+        else if (rand < 90)
+        {
+            box.SetTreasureType(TreasureType.Gold);
+        }
+        else
+        {
+            box.SetTreasureType(TreasureType.Trap);
+        }
+    }
+
 
     private void CreateWallIfNeeded(int x, int z, int offsetX, int offsetZ, Vector3 basePos, Vector3 dir)
     {
@@ -275,7 +314,7 @@ public class DungeonGenerator : MonoBehaviour
             return false;
         }
 
-        return map[z, x] == 0 || map[z, x] == 2;
+        return map[z, x] == 0 || map[z, x] == 2 || map[z, x] == 3;
     }
 
     public Vector3 GetWorldPosition(int x, int z)
@@ -299,5 +338,70 @@ public class DungeonGenerator : MonoBehaviour
     public void SetTileType(int x, int z, int value)
     {
         map[z, x] = value;
+    }
+
+    private void PlaceExit()
+    {
+        int mapWidth = map.GetLength(1);
+        int mapHeight = map.GetLength(0);
+
+        var visited = new bool[mapHeight, mapWidth];
+        var queue = new Queue<(Vector2Int position, int distance)>();
+
+        queue.Enqueue((startPosition, 0));
+        visited[startPosition.y, startPosition.x] = true;
+
+        Vector2Int farthestPosition = startPosition;
+        int farthestDistance = 0;
+
+        Vector2Int[] directions =
+        {
+        Vector2Int.up,
+        Vector2Int.down,
+        Vector2Int.left,
+        Vector2Int.right
+    };
+
+        while (queue.Count > 0)
+        {
+            var current = queue.Dequeue();
+
+            if (current.distance > farthestDistance)
+            {
+                farthestDistance = current.distance;
+                farthestPosition = current.position;
+            }
+
+            foreach (Vector2Int direction in directions)
+            {
+                Vector2Int next = current.position + direction;
+
+                if (next.x < 0 || next.x >= mapWidth ||
+                    next.y < 0 || next.y >= mapHeight)
+                {
+                    continue;
+                }
+
+                if (visited[next.y, next.x])
+                    continue;
+
+                if (map[next.y, next.x] != 0)
+                    continue;
+
+                visited[next.y, next.x] = true;
+                queue.Enqueue((next, current.distance + 1));
+            }
+        }
+
+        if (farthestPosition == startPosition)
+        {
+            Debug.LogError("出口を配置できる通路がありません");
+            return;
+        }
+
+        map[farthestPosition.y, farthestPosition.x] = 3;
+
+        Debug.Log(
+            $"出口を配置しました: {farthestPosition}, 距離: {farthestDistance}");
     }
 }

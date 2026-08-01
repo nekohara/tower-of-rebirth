@@ -34,6 +34,8 @@ public class GameManager : MonoBehaviour
 
     public PlayerStatus playerStatus = new PlayerStatus();
 
+    public int currentDungeonFloor = 1;
+
     private void Awake()
     {
         if (playerStatus == null)
@@ -42,6 +44,8 @@ public class GameManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+
+
             DontDestroyOnLoad(gameObject);
         }
         else
@@ -49,5 +53,15 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
         }
 
+
+    }
+
+    public void ResetDungeonProgress()
+    {
+        currentDungeonFloor = 1;
+        currentDungeonMap = null;
+        hasDungeonMap = false;
+        hasDungeonPosition = false;
+        dungeonPlayerGridPos = Vector2Int.zero;
     }
 }
