@@ -24,6 +24,8 @@ public class PlayerMover : MonoBehaviour
 
     int stepsWithoutEncounter = 3;
 
+    private bool isFloorTransitioning;
+
     private string[] dungeonMessages =
 {
     "前に進んだ…",
@@ -271,19 +273,21 @@ public class PlayerMover : MonoBehaviour
             transform.position = targetPosition;
             isMoving = false;
 
-            // ★追加
             if (audioSource != null && footstepSE != null)
             {
                 audioSource.PlayOneShot(footstepSE);
                 StartCoroutine(StopSE(0.4f));
             }
 
+            // 出口なら通常のメッセージ・エンカウント処理を行わない
+            if (CheckDungeonExit())
+            {
+                return;
+            }
+
             ShowRandomMessage();
             CheckEncounter();
-
         }
-
-        
     }
 
     private void CheckEncounter()
@@ -298,6 +302,54 @@ public class PlayerMover : MonoBehaviour
         {
             StartCoroutine(EncounterRoutine());
         }
+    }
+
+    private bool CheckDungeonExit()
+    {
+        if (isFloorTransitioning)
+        {
+            return true;
+        }
+
+        Vector2Int gridPosition =
+            dungeonGenerator.WorldToGrid(transform.position);
+
+        int tileType = dungeonGenerator.GetTileType(
+            gridPosition.x,
+            gridPosition.y);
+
+        if (tileType != 3)
+        {
+            return false;
+        }
+
+        isFloorTransitioning = true;
+
+        GameManager gm = GameManager.Instance;
+
+        if (gm != null)
+        {
+            gm.currentDungeonFloor++;
+
+            // 次のフロアでは新しいマップを生成する
+            gm.currentDungeonMap = null;
+            gm.hasDungeonMap = false;
+
+            // 前フロアの位置を復元しない
+            gm.hasDungeonPosition = false;
+        }
+
+        if (SceneLoader.Instance != null)
+        {
+            SceneLoader.Instance.LoadDungeon();
+        }
+        else
+        {
+            // Dungeonシーン単体での動作確認用
+            SceneManager.LoadScene("Dungeon");
+        }
+
+        return true;
     }
 
     void CheckFrontObject()

@@ -34,6 +34,11 @@ public class SceneLoader : MonoBehaviour
 
     public void LoadPrologue()
     {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.ResetDungeonProgress();
+        }
+
         LoadScene("Prologue");
     }
 

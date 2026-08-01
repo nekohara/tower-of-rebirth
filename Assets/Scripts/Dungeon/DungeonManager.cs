@@ -13,8 +13,7 @@ public class DungeonManager : MonoBehaviour
 
 
     private string dungeonName = "Dungeon";
-    private int floor = 1;
-
+    
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -39,6 +38,13 @@ public class DungeonManager : MonoBehaviour
             potionText.text = $"Potion: {GameManager.Instance.potionCount}";
             weaponText.text = $"ïêäÌ: {GameManager.Instance.weaponName} (+{GameManager.Instance.weaponPower})";
             armorText.text = $"ñhãÔ: {GameManager.Instance.armorName} (+HP {GameManager.Instance.armorHpBonus})";
+        }
+
+        int floor = 1;
+
+        if (GameManager.Instance != null)
+        {
+            floor = GameManager.Instance.currentDungeonFloor;
         }
 
         dungeonNameText.text = $"{dungeonName}:{floor}F";
