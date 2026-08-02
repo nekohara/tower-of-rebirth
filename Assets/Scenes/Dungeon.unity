@@ -1045,8 +1045,13 @@ MonoBehaviour:
   tileSize: 2
   wallHeight: 2
   startPosition: {x: 1, y: 1}
-  width: 15
-  height: 15
+  width: 25
+  height: 25
+  minRoomCount: 4
+  maxRoomCount: 7
+  minRoomSize: 3
+  maxRoomSize: 6
+  roomPlacementAttempts: 200
 --- !u!4 &640088054
 Transform:
   m_ObjectHideFlags: 0
@@ -1676,6 +1681,7 @@ MonoBehaviour:
   fadeController: {fileID: 2110674591}
   audioSource: {fileID: 789209081}
   footstepSE: {fileID: 8300000, guid: 0382903f00c8ee346aefa2856c90a1e7, type: 3}
+  disableEncounterForDebug: 1
 --- !u!65 &789209077
 BoxCollider:
   m_ObjectHideFlags: 0

@@ -17,6 +17,9 @@ public class PlayerMover : MonoBehaviour
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private AudioClip footstepSE;
 
+    [SerializeField]
+    private bool disableEncounterForDebug;
+
     private bool isRotating = false;
     private bool isMoving = false;
     private Vector3 targetPosition;
@@ -292,6 +295,14 @@ public class PlayerMover : MonoBehaviour
 
     private void CheckEncounter()
     {
+
+#if UNITY_EDITOR
+        if (disableEncounterForDebug)
+        {
+            return;
+        }
+#endif
+
         if (stepsWithoutEncounter > 0)
         {
             stepsWithoutEncounter--;
