@@ -69,6 +69,7 @@
     <Compile Include="Assets\Scripts\Dungeon\TreasureBox.cs" />
     <Compile Include="Assets\Scripts\UI\PrologueController.cs" />
     <Compile Include="Assets\Scripts\UI\GuildDialogueController.cs" />
+    <Compile Include="Assets\Scripts\Dungeon\DungeonMinimap.cs" />
     <Compile Include="Assets\Scripts\Data\Skill.cs" />
     <Compile Include="Assets\Scripts\Dungeon\FadeController.cs" />
     <Compile Include="Assets\Scripts\Battle\BattleManager.cs" />

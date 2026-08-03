@@ -22,6 +22,7 @@ public class DungeonGenerator : MonoBehaviour
     [SerializeField] private int maxRoomSize = 6;
     [SerializeField] private int roomPlacementAttempts = 200;
 
+
     private readonly List<RectInt> rooms = new List<RectInt>();
 
     public Vector2Int StartPosition => startPosition;
@@ -29,6 +30,10 @@ public class DungeonGenerator : MonoBehaviour
     private int[,] map;
 
     public float TileSize => tileSize;
+
+    public bool HasMap => map != null;
+    public int MapWidth => map?.GetLength(1) ?? 0;
+    public int MapHeight => map?.GetLength(0) ?? 0;
 
     private void Start()
     {
