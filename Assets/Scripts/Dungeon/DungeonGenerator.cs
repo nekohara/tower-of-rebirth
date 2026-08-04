@@ -35,6 +35,8 @@ public class DungeonGenerator : MonoBehaviour
     public int MapWidth => map?.GetLength(1) ?? 0;
     public int MapHeight => map?.GetLength(0) ?? 0;
 
+    public int GenerationVersion { get; private set; }
+
     private void Start()
     {
         if (dungeonRoot == null)
@@ -331,6 +333,8 @@ public class DungeonGenerator : MonoBehaviour
                 }
             }
         }
+
+        GenerationVersion++;
     }
 
     private Quaternion GetExitRotation(int x, int z)

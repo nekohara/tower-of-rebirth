@@ -42,6 +42,12 @@ public class DungeonMinimap : MonoBehaviour
 
     private bool initialized;
 
+    [SerializeField]
+    private Color unexploredColor = Color.black;
+
+    private bool[,] exploredTiles;
+    private int lastGenerationVersion;
+
     private IEnumerator Start()
     {
         if (dungeonGenerator == null ||
@@ -53,11 +59,11 @@ public class DungeonMinimap : MonoBehaviour
             yield break;
         }
 
-        // DungeonGenerator.Start()ÇÃäÆóπÇë“Ç¬
         yield return new WaitUntil(
             () => dungeonGenerator.HasMap);
 
         CreateTexture();
+        ResetExploration();
         RefreshMinimap();
 
         initialized = true;
@@ -67,6 +73,15 @@ public class DungeonMinimap : MonoBehaviour
     {
         if (!initialized)
         {
+            return;
+        }
+
+        // êVÇµÇ¢ÉtÉçÉAÇ™ê∂ê¨Ç≥ÇÍÇΩ
+        if (dungeonGenerator.GenerationVersion !=
+            lastGenerationVersion)
+        {
+            ResetExploration();
+            RefreshMinimap();
             return;
         }
 
@@ -86,6 +101,42 @@ public class DungeonMinimap : MonoBehaviour
             RefreshMinimap();
         }
     }
+
+
+    private void ResetExploration()
+    {
+        exploredTiles = new bool[
+            dungeonGenerator.MapHeight,
+            dungeonGenerator.MapWidth];
+
+        lastGenerationVersion =
+            dungeonGenerator.GenerationVersion;
+    }
+
+    private void RevealAroundPlayer()
+    {
+        Vector2Int playerPosition =
+            dungeonGenerator.WorldToGrid(
+                playerMover.transform.position);
+
+        for (int offsetZ = -1; offsetZ <= 1; offsetZ++)
+        {
+            for (int offsetX = -1; offsetX <= 1; offsetX++)
+            {
+                int x = playerPosition.x + offsetX;
+                int z = playerPosition.y + offsetZ;
+
+                if (x < 0 || x >= dungeonGenerator.MapWidth ||
+                    z < 0 || z >= dungeonGenerator.MapHeight)
+                {
+                    continue;
+                }
+
+                exploredTiles[z, x] = true;
+            }
+        }
+    }
+
 
     private void CreateTexture()
     {
@@ -109,6 +160,8 @@ public class DungeonMinimap : MonoBehaviour
 
     public void RefreshMinimap()
     {
+        RevealAroundPlayer();
+
         DrawDungeon();
         DrawPlayer();
 
@@ -132,6 +185,12 @@ public class DungeonMinimap : MonoBehaviour
                  x < dungeonGenerator.MapWidth;
                  x++)
             {
+                if (!exploredTiles[z, x])
+                {
+                    FillTile(x, z, unexploredColor);
+                    continue;
+                }
+
                 int tileType =
                     dungeonGenerator.GetTileType(x, z);
 
@@ -140,6 +199,7 @@ public class DungeonMinimap : MonoBehaviour
             }
         }
     }
+
 
     private Color GetTileColor(int tileType)
     {
