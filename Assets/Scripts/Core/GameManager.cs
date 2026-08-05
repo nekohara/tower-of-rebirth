@@ -64,4 +64,22 @@ public class GameManager : MonoBehaviour
         hasDungeonPosition = false;
         dungeonPlayerGridPos = Vector2Int.zero;
     }
+
+    public void ResetGameProgress()
+    {
+        playerExp = 0;
+        nextExp = 10;
+        potionCount = 3;
+
+        weaponName = "‚È‚µ";
+        weaponPower = 0;
+
+        armorName = "‚È‚µ";
+        armorHpBonus = 0;
+
+        playerGold = 10;
+        playerStatus = new PlayerStatus();
+
+        ResetDungeonProgress();
+    }
 }

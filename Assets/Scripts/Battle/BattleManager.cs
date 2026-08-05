@@ -1257,9 +1257,15 @@ public class BattleManager : MonoBehaviour
         GameManager.Instance.dungeonPlayerRotation = Quaternion.identity;
 
         // ‚±‚±’Ç‰Á
-        messageText.text = "ˆÓ¯‚ğ¸‚Á‚½c\n‹C‚ª‚Â‚­‚Æ“üŒû‚É‚¢‚½c";
+        if (SceneLoader.Instance != null)
+        {
+            SceneLoader.Instance.LoadGameOver();
+        }
+        else
+        {
+            SceneManager.LoadScene("GameOver");
+        }
 
-        Invoke(nameof(ReturnToDungeon), 2.5f);
     }
     #endregion
 

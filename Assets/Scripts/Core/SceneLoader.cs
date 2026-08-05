@@ -63,6 +63,17 @@ public class SceneLoader : MonoBehaviour
         LoadScene("PlayerCreation");
     }
 
+
+    public void LoadGameOver()
+    {
+        LoadScene("GameOver");
+    }
+
+    public void LoadToBeContinued()
+    {
+        LoadScene("ToBeContinued");
+    }
+
     public void LoadScene(string sceneName)
     {
         if (isTransitioning)
