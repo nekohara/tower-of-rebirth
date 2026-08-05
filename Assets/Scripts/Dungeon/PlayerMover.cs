@@ -20,6 +20,8 @@ public class PlayerMover : MonoBehaviour
     [SerializeField]
     private bool disableEncounterForDebug;
 
+    [SerializeField] private int demoClearFloor = 3;
+
     private bool isRotating = false;
     private bool isMoving = false;
     private Vector3 targetPosition;
@@ -297,10 +299,10 @@ public class PlayerMover : MonoBehaviour
     {
 
 #if UNITY_EDITOR
-        if (disableEncounterForDebug)
-        {
-            return;
-        }
+        //if (disableEncounterForDebug)
+        //{
+        //    return;
+        //}
 #endif
 
         if (stepsWithoutEncounter > 0)
@@ -314,7 +316,6 @@ public class PlayerMover : MonoBehaviour
             StartCoroutine(EncounterRoutine());
         }
     }
-
     private bool CheckDungeonExit()
     {
         if (isFloorTransitioning)
@@ -338,6 +339,22 @@ public class PlayerMover : MonoBehaviour
 
         GameManager gm = GameManager.Instance;
 
+        // 体験版の最終階をクリア
+        if (gm != null && gm.currentDungeonFloor >= demoClearFloor)
+        {
+            if (SceneLoader.Instance != null)
+            {
+                SceneLoader.Instance.LoadToBeContinued();
+            }
+            else
+            {
+                SceneManager.LoadScene("ToBeContinued");
+            }
+
+            return true;
+        }
+
+        // 次のフロアへ進む
         if (gm != null)
         {
             gm.currentDungeonFloor++;
@@ -356,7 +373,6 @@ public class PlayerMover : MonoBehaviour
         }
         else
         {
-            // Dungeonシーン単体での動作確認用
             SceneManager.LoadScene("Dungeon");
         }
 

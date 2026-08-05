@@ -84,6 +84,7 @@
     <Compile Include="Assets\Scripts\Town\TownManager.cs" />
     <Compile Include="Assets\Scripts\Dungeon\DungeonManager.cs" />
     <Compile Include="Assets\Scripts\Data\PlayerStatus.cs" />
+    <Compile Include="Assets\Scripts\Core\GameEndController.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
