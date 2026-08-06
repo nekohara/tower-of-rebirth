@@ -910,6 +910,7 @@ MonoBehaviour:
   exitColor: {r: 0.1, g: 0.8, b: 0.2, a: 1}
   playerColor: {r: 0.9, g: 0.1, b: 0.1, a: 1}
   directionColor: {r: 1, g: 1, b: 1, a: 1}
+  unexploredColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!4 &477535498
 Transform:
   m_ObjectHideFlags: 0
@@ -1735,7 +1736,8 @@ MonoBehaviour:
   fadeController: {fileID: 2110674591}
   audioSource: {fileID: 789209081}
   footstepSE: {fileID: 8300000, guid: 0382903f00c8ee346aefa2856c90a1e7, type: 3}
-  disableEncounterForDebug: 1
+  disableEncounterForDebug: 0
+  demoClearFloor: 3
 --- !u!65 &789209077
 BoxCollider:
   m_ObjectHideFlags: 0

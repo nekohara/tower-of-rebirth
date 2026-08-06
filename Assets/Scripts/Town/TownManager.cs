@@ -130,7 +130,7 @@ public class TownManager : MonoBehaviour
         {
             GameManager.Instance.playerGold -= armor.price;
             GameManager.Instance.armorName = armor.name;
-            GameManager.Instance.armorHpBonus = armor.hpBonus;
+            GameManager.Instance.armorDefense = armor.defense;
 
             int newMaxHp = GameManager.Instance.playerStatus.level * 0; // égÇÌÇ»Ç¢ÇÃÇ≈ñ≥éãÇµÇƒOK
             int oldMaxHp = GameManager.Instance.playerStatus.maxHp;
@@ -156,7 +156,7 @@ public class TownManager : MonoBehaviour
     {
         if (GameManager.Instance == null) return 20;
 
-        return GameManager.Instance.playerStatus.maxHp + GameManager.Instance.armorHpBonus;
+        return GameManager.Instance.playerStatus.maxHp;
     }
     private void RefreshUI()
     {
@@ -165,7 +165,7 @@ public class TownManager : MonoBehaviour
         levelText.text = $"Lv: {GameManager.Instance.playerStatus.level}";
         goldText.text = $"Gold: {GameManager.Instance.playerStatus.gold}";
         weaponText.text = $"ïêäÌ: {GameManager.Instance.weaponName} (+{GameManager.Instance.weaponPower})";
-        armorText.text = $"ñhãÔ: {GameManager.Instance.armorName} (+HP {GameManager.Instance.armorHpBonus})";
+        armorText.text = $"ñhãÔ: {GameManager.Instance.armorName} (+Defense   {GameManager.Instance.armorDefense})";
         potionText.text = $"Potion: {GameManager.Instance.potionCount}";
     }
 

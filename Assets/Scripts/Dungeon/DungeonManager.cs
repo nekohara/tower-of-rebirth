@@ -37,7 +37,7 @@ public class DungeonManager : MonoBehaviour
             expText.text = $"EXP: {GameManager.Instance.playerExp}/{GameManager.Instance.nextExp}";
             potionText.text = $"Potion: {GameManager.Instance.potionCount}";
             weaponText.text = $"ïêäÌ: {GameManager.Instance.weaponName} (+{GameManager.Instance.weaponPower})";
-            armorText.text = $"ñhãÔ: {GameManager.Instance.armorName} (+HP {GameManager.Instance.armorHpBonus})";
+            armorText.text = $"ñhãÔ: {GameManager.Instance.armorName} (+Defense  {GameManager.Instance.armorDefense})";
         }
 
         int floor = 1;
@@ -55,7 +55,7 @@ public class DungeonManager : MonoBehaviour
     {
         if (GameManager.Instance == null) return 20;
 
-        return GameManager.Instance.playerStatus.maxHp + GameManager.Instance.armorHpBonus;
+        return GameManager.Instance.playerStatus.maxHp;
     }
 
 

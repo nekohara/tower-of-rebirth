@@ -974,6 +974,7 @@ public class BattleManager : MonoBehaviour
             actionMessage += "\nã≠çUåÇÅI";
         }
 
+
         return damage;
     }
 
@@ -995,6 +996,17 @@ public class BattleManager : MonoBehaviour
         if (!didHeal)
         {
             damage = CalculateEnemyDamage(out msg);
+
+            // ñhãÔÇ…ÇÊÇÈÉ_ÉÅÅ[ÉWåyå∏
+            if (GameManager.Instance != null)
+            {
+                damage = Mathf.Max(
+                    1,
+                    damage - GameManager.Instance.armorDefense
+                );
+            }
+
+
 
             if (isDefending)
             {
@@ -1110,7 +1122,7 @@ public class BattleManager : MonoBehaviour
             string statusName = result.Type switch
             {
                 StatusType.MaxHp => "ç≈ëÂHP",
-                StatusType.Strength => "ãÿóÕ",
+                StatusType.Strength => "òróÕ",
                 StatusType.Vitality => "ëÃóÕ",
                 StatusType.Speed => "ëfëÅÇ≥",
                 StatusType.Dexterity => "äÌópÇ≥",
@@ -1171,7 +1183,7 @@ public class BattleManager : MonoBehaviour
             expText.text = $"EXP: {GameManager.Instance.playerExp}/{GameManager.Instance.nextExp}";
             
             weaponText.text = $"ïêäÌ: {GameManager.Instance.weaponName} (+{GameManager.Instance.weaponPower})";
-            armorText.text = $"ñhãÔ: {GameManager.Instance.armorName} (+HP {GameManager.Instance.armorHpBonus})";
+            armorText.text =  $"ñhãÔ: {GameManager.Instance.armorName} (+Defense {GameManager.Instance.armorDefense})";
 
             var potion = GameManager.Instance.playerStatus.inventory .FirstOrDefault(x => x.id == "potion");
 
@@ -1209,7 +1221,7 @@ public class BattleManager : MonoBehaviour
     {
         if (GameManager.Instance == null) return 20;
 
-        return GameManager.Instance.playerStatus.maxHp + GameManager.Instance.armorHpBonus;
+        return GameManager.Instance.playerStatus.maxHp;
     }
 
     private void ReturnToDungeon()
@@ -1249,14 +1261,13 @@ public class BattleManager : MonoBehaviour
 
     private void HandleDefeat()
     {
-        GameManager.Instance.playerStatus.hp = Mathf.Max(1, GameManager.Instance.playerStatus.maxHp / 2);
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.hasDungeonPosition = false;
+            GameManager.Instance.dungeonPlayerPosition = Vector3.zero;
+            GameManager.Instance.dungeonPlayerRotation = Quaternion.identity;
+        }
 
-        // ì¸å˚ç¿ïWÇ…ñﬂÇ∑èÍçá
-        GameManager.Instance.hasDungeonPosition = false;
-        GameManager.Instance.dungeonPlayerPosition = Vector3.zero;
-        GameManager.Instance.dungeonPlayerRotation = Quaternion.identity;
-
-        // Ç±Ç±í«â¡
         if (SceneLoader.Instance != null)
         {
             SceneLoader.Instance.LoadGameOver();
@@ -1265,7 +1276,6 @@ public class BattleManager : MonoBehaviour
         {
             SceneManager.LoadScene("GameOver");
         }
-
     }
     #endregion
 
