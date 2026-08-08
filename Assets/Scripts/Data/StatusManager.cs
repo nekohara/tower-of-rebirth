@@ -29,6 +29,11 @@ public class StatusManager : MonoBehaviour
     [SerializeField] private TMP_Dropdown weaponDropdown;
     [SerializeField] private TMP_Dropdown armorDropdown;
 
+    private static readonly List<GameObject> hiddenSceneRoots =
+    new List<GameObject>();
+
+    private static string sourceSceneName;
+
     private void Start()
     {
         InitializeEquipmentDropdowns();
@@ -138,8 +143,51 @@ public class StatusManager : MonoBehaviour
         );
     }
 
+    public static void OpenStatus()
+    {
+        Scene sourceScene = SceneManager.GetActiveScene();
+
+        if (sourceScene.name == "Status")
+            return;
+
+        sourceSceneName = sourceScene.name;
+        hiddenSceneRoots.Clear();
+
+        // Statusを読み込む前に、元シーンで有効なルートだけ記録
+        foreach (GameObject root in sourceScene.GetRootGameObjects())
+        {
+            if (root.activeSelf)
+                hiddenSceneRoots.Add(root);
+        }
+
+        SceneManager.LoadScene("Status", LoadSceneMode.Additive);
+
+        foreach (GameObject root in hiddenSceneRoots)
+            root.SetActive(false);
+
+        Scene statusScene = SceneManager.GetSceneByName("Status");
+
+        if (statusScene.IsValid())
+            SceneManager.SetActiveScene(statusScene);
+    }
+
     public void OnClickBack()
     {
-        SceneManager.LoadScene("Town");
+        Scene statusScene = gameObject.scene;
+
+        foreach (GameObject root in hiddenSceneRoots)
+        {
+            if (root != null)
+                root.SetActive(true);
+        }
+
+        hiddenSceneRoots.Clear();
+
+        Scene sourceScene = SceneManager.GetSceneByName(sourceSceneName);
+
+        if (sourceScene.IsValid())
+            SceneManager.SetActiveScene(sourceScene);
+
+        SceneManager.UnloadSceneAsync(statusScene);
     }
 }

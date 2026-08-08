@@ -173,7 +173,7 @@ public class TownManager : MonoBehaviour
 
     public void OnClickStatus()
     {
-        SceneManager.LoadScene("Status");
+        StatusManager.OpenStatus();
     }
 
 }

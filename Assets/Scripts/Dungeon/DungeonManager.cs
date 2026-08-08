@@ -66,4 +66,9 @@ public class DungeonManager : MonoBehaviour
     {
         instructionPanel.SetActive(!instructionPanel.activeSelf);
     }
+
+    public void OnClickStatus()
+    {
+        StatusManager.OpenStatus();
+    }
 }
