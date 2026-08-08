@@ -299,10 +299,10 @@ public class PlayerMover : MonoBehaviour
     {
 
 #if UNITY_EDITOR
-        //if (disableEncounterForDebug)
-        //{
-        //    return;
-        //}
+        if (disableEncounterForDebug)
+        {
+            return;
+        }
 #endif
 
         if (stepsWithoutEncounter > 0)
