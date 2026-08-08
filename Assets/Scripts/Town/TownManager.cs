@@ -1,5 +1,6 @@
-using UnityEngine;
 using TMPro;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class TownManager : MonoBehaviour
 {
@@ -167,6 +168,12 @@ public class TownManager : MonoBehaviour
         weaponText.text = $"ïêäÌ: {GameManager.Instance.weaponName} (+{GameManager.Instance.weaponPower})";
         armorText.text = $"ñhãÔ: {GameManager.Instance.armorName} (+Defense   {GameManager.Instance.armorDefense})";
         potionText.text = $"Potion: {GameManager.Instance.potionCount}";
+    }
+
+
+    public void OnClickStatus()
+    {
+        SceneManager.LoadScene("Status");
     }
 
 }

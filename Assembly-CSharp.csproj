@@ -66,6 +66,7 @@
     <Compile Include="Assets\Scripts\Dungeon\PlayerMover.cs" />
     <Compile Include="Assets\Scripts\Dungeon\DungeonExit.cs" />
     <Compile Include="Assets\Scripts\Dungeon\DungeonGenerator.cs" />
+    <Compile Include="Assets\Scripts\Data\StatusManager.cs" />
     <Compile Include="Assets\Scripts\Dungeon\TreasureBox.cs" />
     <Compile Include="Assets\Scripts\UI\PrologueController.cs" />
     <Compile Include="Assets\Scripts\UI\GuildDialogueController.cs" />
