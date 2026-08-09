@@ -12,4 +12,5 @@ public class InventoryItem
 
     public int healAmount;
     public bool isHealItem;
+    public int price;
 }

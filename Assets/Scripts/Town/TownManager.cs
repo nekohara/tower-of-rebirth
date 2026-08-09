@@ -1,4 +1,4 @@
-using TMPro;
+Ôªøusing TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -16,20 +16,23 @@ public class TownManager : MonoBehaviour
 
     [SerializeField] private TMP_Text armorText;
 
-    private Armor[] armors =
-    {
-    new Armor("ävÇÃäZ", 12, 5),
-    new Armor("ìSÇÃäZ", 30, 10)
-};
+    [Header("„Ç∑„Éß„ÉÉ„Éó„Éë„Éç„É´")]
+    [SerializeField] private GameObject mainCommandPanel;
+    [SerializeField] private GameObject weaponShopPanel;
+    [SerializeField] private GameObject armorShopPanel;
+    [SerializeField] private GameObject itemShopPanel;
+    [SerializeField]
+    private ShopPanelController itemShopController;
 
-    private Weapon[] weapons =
-{
-    new Weapon("ñÿÇÃåï", 10, 2),
-    new Weapon("ìSÇÃåï", 25, 4),
-    new Weapon("ç|ÇÃåï", 50, 7)
-};
+    [SerializeField]
+    private ShopPanelController weaponShopController;
+
+    [SerializeField]
+    private ShopPanelController armorShopController;
+
     private void Start()
     {
+        ShowMainCommands();
         RefreshUI();
     }
 
@@ -37,120 +40,30 @@ public class TownManager : MonoBehaviour
     {
         if (GameManager.Instance == null) return;
 
-        if (GameManager.Instance.playerGold >= restCost)
+        if (GameManager.Instance.playerStatus.gold >= restCost)
         {
             GameManager.Instance.playerStatus.gold -= restCost;
             GameManager.Instance.playerStatus.hp = GetTotalMaxHp();
 
             if (messageText != null)
             {
-                messageText.text = $"{restCost}Gï•Ç¡ÇƒãxÇÒÇæÅBëÃóÕÇ™âÒïúÇµÇΩÅI";
+                messageText.text = $"{restCost}GÊâï„Å£„Å¶‰ºë„Çì„Å†„ÄÇ‰ΩìÂäõ„ÅåÂõûÂæ©„Åó„ÅüÔºÅ";
             }
         }
         else
         {
             if (messageText != null)
             {
-                messageText.text = "Ç®ã‡Ç™ë´ÇËÇ»Ç¢Åc";
+                messageText.text = "„ÅäÈáë„ÅåË∂≥„Çä„Å™„ÅÑ‚Ä¶";
             }
         }
 
         RefreshUI();
-    }
-
-    public void BuyPotion()
-    {
-        if (GameManager.Instance == null) return;
-
-        if (GameManager.Instance.playerGold >= potionPrice)
-        {
-            GameManager.Instance.playerGold -= potionPrice;
-            GameManager.Instance.potionCount++;
-
-            messageText.text = "É|Å[ÉVÉáÉìÇçwì¸ÇµÇΩÅI";
-        }
-        else
-        {
-            messageText.text = "Ç®ã‡Ç™ë´ÇËÇ»Ç¢Åc";
-        }
-
-        RefreshUI();
-    }
-
-    public void BuyWoodSword()
-    {
-        BuyWeapon(weapons[0]);
-    }
-
-    public void BuyIronSword()
-    {
-        BuyWeapon(weapons[1]);
-    }
-
-
-    public void BuyWeapon(Weapon weapon)
-    {
-        if (GameManager.Instance == null) return;
-
-        if (GameManager.Instance.playerGold >= weapon.price)
-        {
-            GameManager.Instance.playerGold -= weapon.price;
-            GameManager.Instance.weaponPower = weapon.power;
-            GameManager.Instance.weaponName = weapon.name;
-
-            messageText.text = $"{weapon.name}ÇëïîıÇµÇΩÅI";
-        }
-        else
-        {
-            messageText.text = "Ç®ã‡Ç™ë´ÇËÇ»Ç¢Åc";
-        }
-
-        RefreshUI();
-    }
-
-    public void BuyLeatherArmor()
-    {
-        BuyArmor(armors[0]);
-    }
-
-    public void BuyIronArmor()
-    {
-        BuyArmor(armors[1]);
     }
 
     public void OnClickDungeon()
     {
         SceneLoader.Instance.LoadDungeon();
-    }
-
-    private void BuyArmor(Armor armor)
-    {
-        if (GameManager.Instance == null) return;
-
-        if (GameManager.Instance.playerGold >= armor.price)
-        {
-            GameManager.Instance.playerGold -= armor.price;
-            GameManager.Instance.armorName = armor.name;
-            GameManager.Instance.armorDefense = armor.defense;
-
-            int newMaxHp = GameManager.Instance.playerStatus.level * 0; // égÇÌÇ»Ç¢ÇÃÇ≈ñ≥éãÇµÇƒOK
-            int oldMaxHp = GameManager.Instance.playerStatus.maxHp;
-            int totalMaxHp = GetTotalMaxHp();
-
-            // ëïîıÇµÇΩèuä‘Ç…åªç›HPÇ‡è„å¿ì‡Ç≈í≤êÆ
-            if (GameManager.Instance.playerStatus.hp > totalMaxHp)
-            {
-                GameManager.Instance.playerStatus.hp = totalMaxHp;
-            }
-
-            messageText.text = $"{armor.name}ÇëïîıÇµÇΩÅIç≈ëÂHPÉAÉbÉvÅI";
-        }
-        else
-        {
-            messageText.text = "Ç®ã‡Ç™ë´ÇËÇ»Ç¢Åc";
-        }
-
-        RefreshUI();
     }
 
     private int GetTotalMaxHp()
@@ -159,21 +72,82 @@ public class TownManager : MonoBehaviour
 
         return GameManager.Instance.playerStatus.maxHp;
     }
-    private void RefreshUI()
+    public void RefreshUI()
     {
-        if (GameManager.Instance == null) return;
+        GameManager gm = GameManager.Instance;
 
-        levelText.text = $"Lv: {GameManager.Instance.playerStatus.level}";
-        goldText.text = $"Gold: {GameManager.Instance.playerStatus.gold}";
-        weaponText.text = $"ïêäÌ: {GameManager.Instance.weaponName} (+{GameManager.Instance.weaponPower})";
-        armorText.text = $"ñhãÔ: {GameManager.Instance.armorName} (+Defense   {GameManager.Instance.armorDefense})";
-        potionText.text = $"Potion: {GameManager.Instance.potionCount}";
+        if (gm == null)
+            return;
+
+        if (levelText != null)
+            levelText.text = $"Lv: {gm.playerStatus.level}";
+
+        if (goldText != null)
+            goldText.text = $"Gold: {gm.playerStatus.gold}";
+
+        if (weaponText != null)
+            weaponText.text =
+                $"Ê≠¶Âô®: {gm.weaponName} (+{gm.weaponPower})";
+
+        if (armorText != null)
+            armorText.text =
+                $"Èò≤ÂÖ∑: {gm.armorName} (+{gm.armorDefense})";
+
+        if (potionText != null)
+            potionText.text = $"Potion: {gm.potionCount}";
     }
-
 
     public void OnClickStatus()
     {
         StatusManager.OpenStatus();
     }
 
+
+    public void OpenItemShop()
+    {
+        mainCommandPanel.SetActive(false);
+        itemShopPanel.SetActive(true);
+        weaponShopPanel.SetActive(false);
+        armorShopPanel.SetActive(false);
+        itemShopController.CreateProductButtons();
+
+        SetMessage("ÈÅìÂÖ∑Â±ã„Å∏„Çà„ÅÜ„Åì„Åù„ÄÇ");
+    }
+
+    public void OpenWeaponShop()
+    {
+        mainCommandPanel.SetActive(false);
+        itemShopPanel.SetActive(false);
+        weaponShopPanel.SetActive(true);
+        armorShopPanel.SetActive(false);
+        weaponShopController.CreateProductButtons();
+
+
+        SetMessage("Ê≠¶Âô®Â±ã„Å∏„Çà„ÅÜ„Åì„Åù„ÄÇ");
+    }
+
+    public void OpenArmorShop()
+    {
+        mainCommandPanel.SetActive(false);
+        itemShopPanel.SetActive(false);
+        weaponShopPanel.SetActive(false);
+        armorShopPanel.SetActive(true);
+        armorShopController.CreateProductButtons();
+
+        SetMessage("Èò≤ÂÖ∑Â±ã„Å∏„Çà„ÅÜ„Åì„Åù„ÄÇ");
+    }
+
+    public void ShowMainCommands()
+    {
+        mainCommandPanel.SetActive(true);
+        itemShopPanel.SetActive(false);
+        weaponShopPanel.SetActive(false);
+        armorShopPanel.SetActive(false);
+    }
+
+    public void SetMessage(string message)
+    {
+        if (messageText != null)
+            messageText.text = message;
+    }
 }

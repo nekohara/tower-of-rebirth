@@ -77,6 +77,7 @@ public class PlayerStatus
             name = "ƒ|[ƒVƒ‡ƒ“",
             count = 3,
             healAmount = 10,
+            price = 10,
             isHealItem = true
             }
         };
