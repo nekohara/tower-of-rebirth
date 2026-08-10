@@ -1461,6 +1461,7 @@ GameObject:
   - component: {fileID: 339710858}
   - component: {fileID: 339710857}
   - component: {fileID: 339710859}
+  - component: {fileID: 339710860}
   m_Layer: 0
   m_Name: BattleManager
   m_TagString: Untagged
@@ -1504,6 +1505,7 @@ MonoBehaviour:
   batPrefab: {fileID: 280359126212881400, guid: 9afed9e32ac630b43af2b6be6af439b8, type: 3}
   gohstPrefab: {fileID: 5366553778020056133, guid: 77a597805b0e3584c8638edf886fb16d, type: 3}
   mushPrefab: {fileID: 5894470782659754185, guid: 31fa6950347542e4990e89a44f01548e, type: 3}
+  effectController: {fileID: 339710860}
 --- !u!4 &339710858
 Transform:
   m_ObjectHideFlags: 0
@@ -1532,6 +1534,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StatusUI
   hpText: {fileID: 3932009}
+--- !u!114 &339710860
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 339710856}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d90b68309ce64b34c897931eb051cb8e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BattleEffectController
+  shakeDuration: 0.3
+  shakeStrength: 0.12
+  damageColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!1001 &382733326
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3467,6 +3484,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c26ed8734387912409486856c810e441, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneLoader
+  fadeCanvasGroup: {fileID: 0}
+  fadeDuration: 0.5
 --- !u!4 &1004515908
 Transform:
   m_ObjectHideFlags: 0

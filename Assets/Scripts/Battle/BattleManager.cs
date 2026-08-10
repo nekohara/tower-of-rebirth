@@ -63,6 +63,7 @@ public class BattleManager : MonoBehaviour
         public int speed;
         public EnemyType type;
         public GameObject battlePrefab;
+        public int defense = 1;
     
 
         public Enemy(string name, int hp, int attack, int speed, int exp, int gold, EnemyType type)
@@ -98,16 +99,23 @@ public class BattleManager : MonoBehaviour
 
         }
     }
-
     private class BattleActionResult
     {
         public ActionResult result;
         public string message;
+        public int damage;
+        public int healAmount;
 
-        public BattleActionResult(ActionResult result, string message)
+        public BattleActionResult(
+            ActionResult result,
+            string message,
+            int damage = 0,
+            int healAmount = 0)
         {
             this.result = result;
             this.message = message;
+            this.damage = damage;
+            this.healAmount = healAmount;
         }
     }
 
@@ -169,6 +177,8 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private GameObject mushPrefab;
 
 
+    [SerializeField]
+    private BattleEffectController effectController;
 
     private void Start()
     {
@@ -510,7 +520,16 @@ public class BattleManager : MonoBehaviour
                     continue;
                 }
 
-                BattleActionResult actionResult = ExecutePlayerAction(action);
+                BattleActionResult actionResult =  ExecutePlayerAction(action);
+
+                if (actionResult.damage > 0 &&
+                    effectController != null)
+                {
+                    yield return effectController.PlayEnemyDamage(
+                        currentEnemyObject,
+                        actionResult.damage
+                    );
+                }
 
                 if (!string.IsNullOrEmpty(actionResult.message))
                 {
@@ -581,11 +600,7 @@ public class BattleManager : MonoBehaviour
         switch (action.command)
         {
             case BattleCommand.Attack:
-                return new BattleActionResult(
-                    ActionResult.Success,
-                    ExecuteAttack()
-                );
-
+                return ExecuteAttack();
             case BattleCommand.Skill:
                 return ExecuteSkill(action.Skill);
 
@@ -704,18 +719,17 @@ public class BattleManager : MonoBehaviour
         return "";
     }
 
-    private string ExecuteAttack()
+    private BattleActionResult ExecuteAttack()
     {
-        enemyHp -= playerAttack;
+        int damage = Mathf.Max(1, playerAttack - currentEnemy.defense);
+        enemyHp -= damage;
 
-        AddGrowth(
-            StatusType.Strength,
-            1
+        return new BattleActionResult(
+            ActionResult.Success,
+            $"{currentEnemy.name}に{damage}ダメージ！",
+            damage: damage
         );
-
-        return $"{currentEnemy.name}に{playerAttack}ダメージ！";
     }
-
 
     private BattleActionResult ExecuteSkill(Skill skill)
     {
