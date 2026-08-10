@@ -533,6 +533,7 @@ GameObject:
   - component: {fileID: 420832754}
   - component: {fileID: 420832756}
   - component: {fileID: 420832755}
+  - component: {fileID: 420832757}
   m_Layer: 5
   m_Name: ItemContent
   m_TagString: Untagged
@@ -597,6 +598,32 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 420832753}
   m_CullTransparentMesh: 1
+--- !u!114 &420832757
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 420832753}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.VerticalLayoutGroup
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 1
+  m_Spacing: 0
+  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandHeight: 1
+  m_ChildControlWidth: 0
+  m_ChildControlHeight: 0
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!1 &445590341
 GameObject:
   m_ObjectHideFlags: 0
@@ -792,6 +819,7 @@ GameObject:
   - component: {fileID: 545033777}
   - component: {fileID: 545033779}
   - component: {fileID: 545033778}
+  - component: {fileID: 545033780}
   m_Layer: 5
   m_Name: ArmorContent
   m_TagString: Untagged
@@ -856,6 +884,32 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 545033776}
   m_CullTransparentMesh: 1
+--- !u!114 &545033780
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 545033776}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.VerticalLayoutGroup
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 1
+  m_Spacing: 0
+  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandHeight: 1
+  m_ChildControlWidth: 0
+  m_ChildControlHeight: 0
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!1 &586823522
 GameObject:
   m_ObjectHideFlags: 0
@@ -2324,8 +2378,8 @@ MonoBehaviour:
       price: 0
     weapon:
       name: "\u6728\u306E\u5263"
-      price: 50
-      power: 2
+      price: 70
+      power: 3
     armor:
       name: 
       price: 0
@@ -2342,7 +2396,7 @@ MonoBehaviour:
     weapon:
       name: "\u9244\u306E\u5263"
       price: 150
-      power: 3
+      power: 4
     armor:
       name: 
       price: 0
@@ -2688,7 +2742,7 @@ MonoBehaviour:
       price: 0
       power: 0
     armor:
-      name: "\u9769\u306E\u93A7"
+      name: "\u30EC\u30B6\u30FC\u30A2\u30FC\u30DE\u30FC"
       price: 50
       defense: 2
   - productType: 2
@@ -3475,6 +3529,7 @@ GameObject:
   - component: {fileID: 1443900296}
   - component: {fileID: 1443900298}
   - component: {fileID: 1443900297}
+  - component: {fileID: 1443900299}
   m_Layer: 5
   m_Name: WeaponContent
   m_TagString: Untagged
@@ -3540,6 +3595,32 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1443900295}
   m_CullTransparentMesh: 1
+--- !u!114 &1443900299
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1443900295}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.VerticalLayoutGroup
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 1
+  m_Spacing: 0
+  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandHeight: 1
+  m_ChildControlWidth: 0
+  m_ChildControlHeight: 0
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!1 &1452546093
 GameObject:
   m_ObjectHideFlags: 0
@@ -4751,19 +4832,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5890981582650351367, guid: 35af8ec2c701cc941baa08a53d84e23d, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5890981582650351367, guid: 35af8ec2c701cc941baa08a53d84e23d, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5890981582650351367, guid: 35af8ec2c701cc941baa08a53d84e23d, type: 3}
       propertyPath: m_AnchorMin.x
-      value: 0.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5890981582650351367, guid: 35af8ec2c701cc941baa08a53d84e23d, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5890981582650351367, guid: 35af8ec2c701cc941baa08a53d84e23d, type: 3}
       propertyPath: m_SizeDelta.x
