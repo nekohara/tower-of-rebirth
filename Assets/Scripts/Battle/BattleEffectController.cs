@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using TMPro;
 
 public class BattleEffectController : MonoBehaviour
 {
@@ -13,12 +14,27 @@ public class BattleEffectController : MonoBehaviour
     [SerializeField]
     private Color damageColor = Color.red;
 
+    [Header("ダメージ数値")]
+    [SerializeField]
+    private TMP_Text damageTextPrefab;
+
+    [SerializeField]
+    private RectTransform damageTextParent;
+
+    [SerializeField]
+    private float damageTextDuration = 0.7f;
+
+    [SerializeField]
+    private float damageTextMoveDistance = 50f;
+
     public IEnumerator PlayEnemyDamage(
         GameObject enemyObject,
         int damage)
     {
         if (enemyObject == null)
             yield break;
+
+        Coroutine damageTextCoroutine =  StartCoroutine(PlayDamageText(damage));
 
         Transform enemyTransform = enemyObject.transform;
         Vector3 originalPosition = enemyTransform.localPosition;
@@ -65,5 +81,54 @@ public class BattleEffectController : MonoBehaviour
                 material.color = originalColors[i];
             }
         }
+
+        if (damageTextCoroutine != null)
+        {
+            yield return damageTextCoroutine;
+        }
+    }
+
+    private IEnumerator PlayDamageText(int damage)
+    {
+        if (damageTextPrefab == null ||
+            damageTextParent == null)
+        {
+            yield break;
+        }
+
+        TMP_Text damageText = Instantiate(
+            damageTextPrefab,
+            damageTextParent
+        );
+
+        damageText.text = damage.ToString();
+
+        RectTransform rectTransform =
+            damageText.rectTransform;
+
+        Vector2 startPosition =
+            rectTransform.anchoredPosition;
+
+        Color startColor = damageText.color;
+        float elapsedTime = 0f;
+
+        while (elapsedTime < damageTextDuration)
+        {
+            float rate =
+                elapsedTime / damageTextDuration;
+
+            rectTransform.anchoredPosition =
+                startPosition +
+                Vector2.up * damageTextMoveDistance * rate;
+
+            Color currentColor = startColor;
+            currentColor.a = 1f - rate;
+            damageText.color = currentColor;
+
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        Destroy(damageText.gameObject);
     }
 }

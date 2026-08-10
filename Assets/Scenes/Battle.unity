@@ -1549,6 +1549,10 @@ MonoBehaviour:
   shakeDuration: 0.3
   shakeStrength: 0.12
   damageColor: {r: 1, g: 0, b: 0, a: 1}
+  damageTextPrefab: {fileID: 3027495328189209058, guid: 8e452f2610f177749b06b7887d0ee221, type: 3}
+  damageTextParent: {fileID: 507536622}
+  damageTextDuration: 0.7
+  damageTextMoveDistance: 50
 --- !u!1001 &382733326
 PrefabInstance:
   m_ObjectHideFlags: 0

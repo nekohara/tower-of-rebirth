@@ -772,10 +772,11 @@ public class BattleManager : MonoBehaviour
         enemyHp -= skillDamage;
 
         return new BattleActionResult(
-            ActionResult.Success,
-            $"{skill.name}！\n" +
-            $"{currentEnemy.name}に{skillDamage}ダメージ！"
-        );
+                        ActionResult.Success,
+                        $"{skill.name}！\n" +
+                        $"{currentEnemy.name}に{skillDamage}ダメージ！",
+                        damage: skillDamage
+                    );
     }
 
     private BattleActionResult ExecuteItem(InventoryItem item)
