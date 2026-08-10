@@ -16,6 +16,8 @@ public class TreasureBox : MonoBehaviour
 
     [SerializeField] private TreasureType treasureType;
 
+    [SerializeField] private GameObject closedModel;
+    [SerializeField] private GameObject openedModel;
 
     public void Open()
     {
@@ -25,6 +27,19 @@ public class TreasureBox : MonoBehaviour
         StartCoroutine(OpenRoutine());
     }
 
+    private void Awake()
+    {
+        if (closedModel != null)
+        {
+            closedModel.SetActive(true);
+        }
+
+        if (openedModel != null)
+        {
+            openedModel.SetActive(false);
+        }
+    }
+
     public void SetTreasureType(TreasureType type)
     {
         treasureType = type;
@@ -32,12 +47,30 @@ public class TreasureBox : MonoBehaviour
 
     IEnumerator OpenRoutine()
     {
-        if (isOpened) yield break;
+        if (isOpened)
+        {
+            yield break;
+        }
+
         isOpened = true;
 
-        messageText.text = "宝箱を開けた…";
+        if (messageText != null)
+        {
+            messageText.text = "宝箱を開けた……";
+        }
+
+        if (closedModel != null)
+        {
+            closedModel.SetActive(false);
+        }
+
+        if (openedModel != null)
+        {
+            openedModel.SetActive(true);
+        }
 
         yield return new WaitForSeconds(0.5f);
+
 
         // 中身判定
         int luck = GameManager.Instance.playerStatus.luck;
@@ -51,11 +84,50 @@ public class TreasureBox : MonoBehaviour
         switch (treasureType)
         {
             case TreasureType.Potion:
-                int cnt = Random.Range(1, 4); // 1～3個くらいが自然
-                messageText.text = $"ポーションを{cnt}個手に入れた！";
-                GameManager.Instance.potionCount += cnt;
-                break;
+                {
+                    int count = Random.Range(1, 4);
 
+                    PlayerStatus status =
+                        GameManager.Instance.playerStatus;
+
+                    InventoryItem potion =
+                        status.inventory.Find(item => item.id == "potion");
+
+                    if (potion == null)
+                    {
+                        if (messageText != null)
+                        {
+                            messageText.text =
+                                "ポーションのアイテム情報が見つからない。";
+                        }
+
+                        Debug.LogError(
+                            "inventoryにidがpotionのアイテムがありません。");
+
+                        break;
+                    }
+
+                    if (!status.CanAddItem(potion, count))
+                    {
+                        if (messageText != null)
+                        {
+                            messageText.text =
+                                "荷物が重すぎてポーションを持てない……";
+                        }
+
+                        break;
+                    }
+
+                    potion.count += count;
+
+                    if (messageText != null)
+                    {
+                        messageText.text =
+                            $"ポーションを{count}個手に入れた！";
+                    }
+
+                    break;
+                }
             case TreasureType.Gold:
                 
                 int baseGold = Random.Range(10, 100) + luck * 2;
@@ -92,6 +164,6 @@ public class TreasureBox : MonoBehaviour
         }
 
         yield return new WaitForSeconds(0.3f);
-        Destroy(gameObject);
+     
     }
 }

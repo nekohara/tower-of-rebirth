@@ -79,9 +79,6 @@ public class TownManager : MonoBehaviour
         if (gm == null)
             return;
 
-        if (levelText != null)
-            levelText.text = $"Lv: {gm.playerStatus.level}";
-
         if (goldText != null)
             goldText.text = $"Gold: {gm.playerStatus.gold}";
 
@@ -93,8 +90,16 @@ public class TownManager : MonoBehaviour
             armorText.text =
                 $"防具: {gm.armorName} (+{gm.armorDefense})";
 
-        if (potionText != null)
-            potionText.text = $"Potion: {gm.potionCount}";
+        if(potionText != null)
+{
+            InventoryItem potion =
+                gm.playerStatus.inventory.Find(
+                    item => item.id == "potion");
+
+            int potionCount = potion?.count ?? 0;
+
+            potionText.text = $"Potion: {potionCount}";
+        }
     }
 
     public void OnClickStatus()

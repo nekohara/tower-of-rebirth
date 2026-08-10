@@ -76,9 +76,18 @@ public class ShopPanelController : MonoBehaviour
             return;
         }
 
+        // 支払い前に重量を確認
+        if (product.productType == ShopProductType.Item &&
+            !gm.playerStatus.CanAddItem(product.item))
+        {
+            townManager.SetMessage(
+                "荷物が重すぎて、これ以上持てない……");
+            return;
+        }
+
         if (gm.playerStatus.gold < product.Price)
         {
-            townManager.SetMessage("所持金が足りない……");
+            townManager.SetMessage("お金が足りない……");
             return;
         }
 
@@ -133,10 +142,20 @@ public class ShopPanelController : MonoBehaviour
         if (item == null)
             return;
 
-        // 現在はポーションだけを個数管理している
-        if (item.id == "potion")
+        PlayerStatus status =
+            GameManager.Instance.playerStatus;
+
+        InventoryItem ownedItem =
+            status.inventory.Find(
+                inventoryItem => inventoryItem.id == item.id);
+
+        if (ownedItem != null)
         {
-            GameManager.Instance.potionCount++;
+            ownedItem.count++;
+            return;
         }
+
+        item.count = 1;
+        status.inventory.Add(item);
     }
 }

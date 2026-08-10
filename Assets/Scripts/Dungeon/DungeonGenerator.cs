@@ -244,45 +244,57 @@ public class DungeonGenerator : MonoBehaviour
             map[z, x] = 0;
         }
     }
-
     private void PlaceTreasureBoxes()
     {
         int treasureCount = Random.Range(1, 3);
-        int placed = 0;
-        int attempts = 0;
 
-        RectInt startRoom = rooms[0];
+        var candidates = new List<Vector2Int>();
 
-        while (placed < treasureCount && attempts < 1000)
+        // 開始部屋を除外
+        for (int roomIndex = 1; roomIndex < rooms.Count; roomIndex++)
         {
-            attempts++;
+            RectInt room = rooms[roomIndex];
 
-            int chestX = Random.Range(1, width - 1);
-            int chestZ = Random.Range(1, height - 1);
-
-            Vector2Int chestPosition =
-                new Vector2Int(chestX, chestZ);
-
-            // 通路・部屋の床以外、出口、既存宝箱を除外
-            if (map[chestZ, chestX] != 0)
+            Vector2Int[] corners =
             {
-                continue;
-            }
+            new Vector2Int(room.xMin, room.yMin),
+            new Vector2Int(room.xMax - 1, room.yMin),
+            new Vector2Int(room.xMin, room.yMax - 1),
+            new Vector2Int(room.xMax - 1, room.yMax - 1)
+        };
 
-            // 開始部屋には配置しない
-            if (startRoom.Contains(chestPosition))
+            foreach (Vector2Int position in corners)
             {
-                continue;
-            }
+                // 出口などが配置されているマスは除外
+                if (map[position.y, position.x] != 0)
+                {
+                    continue;
+                }
 
-            map[chestZ, chestX] = 2;
+                candidates.Add(position);
+            }
+        }
+
+        int placed = 0;
+
+        while (placed < treasureCount && candidates.Count > 0)
+        {
+            int index = Random.Range(0, candidates.Count);
+            Vector2Int position = candidates[index];
+
+            candidates.RemoveAt(index);
+
+            map[position.y, position.x] = 2;
             placed++;
+
+            // 同じ部屋へ複数配置されるのを防ぐなら、
+            // ここで同一部屋の候補を削除してもよい
         }
 
         if (placed < treasureCount)
         {
             Debug.LogWarning(
-                $"宝箱を{treasureCount}個中{placed}個しか配置できませんでした");
+                $"宝箱を{treasureCount}個中{placed}個しか配置できませんでした。");
         }
     }
 
@@ -322,7 +334,7 @@ public class DungeonGenerator : MonoBehaviour
 
                 if (tileType == 2)
                 {
-                    CreateTreasureBox(basePos);
+                    CreateTreasureBox(basePos, new Vector2Int(x, z));
                 }
                 else if (tileType == 3)
                 {
@@ -364,15 +376,28 @@ public class DungeonGenerator : MonoBehaviour
         return Quaternion.identity;
     }
 
-    private void CreateTreasureBox(Vector3 basePos)
+    private void CreateTreasureBox(
+        Vector3 basePos,
+        Vector2Int gridPosition)
     {
+        Quaternion rotation =
+    GetTreasureRotation(gridPosition) *
+    Quaternion.Euler(0f, 180f, 0f);
+
         GameObject chest = Instantiate(
             chestPrefab,
             basePos,
-            Quaternion.identity,
+            rotation,
             dungeonRoot);
 
         TreasureBox box = chest.GetComponent<TreasureBox>();
+
+        if (box == null)
+        {
+            Debug.LogError(
+                "宝箱PrefabにTreasureBoxが設定されていません。");
+            return;
+        }
 
         int rand = Random.Range(0, 100);
 
@@ -389,7 +414,6 @@ public class DungeonGenerator : MonoBehaviour
             box.SetTreasureType(TreasureType.Trap);
         }
     }
-
 
     private void CreateWallIfNeeded(int x, int z, int offsetX, int offsetZ, Vector3 basePos, Vector3 dir)
     {
@@ -448,8 +472,7 @@ public class DungeonGenerator : MonoBehaviour
         {
             return false;
         }
-
-        return map[z, x] == 0 || map[z, x] == 2 || map[z, x] == 3;
+        return map[z, x] == 0 || map[z, x] == 3;
     }
 
     public Vector3 GetWorldPosition(int x, int z)
@@ -554,6 +577,48 @@ public class DungeonGenerator : MonoBehaviour
             $"出口を配置しました: {farthestPosition}, 距離: {farthestDistance}");
     }
 
+
+    private Quaternion GetTreasureRotation(Vector2Int chestPosition)
+    {
+        Vector2Int[] directions =
+        {
+        Vector2Int.up,
+        Vector2Int.right,
+        Vector2Int.down,
+        Vector2Int.left
+    };
+
+        foreach (Vector2Int direction in directions)
+        {
+            Vector2Int frontPosition = chestPosition + direction;
+
+            if (!IsInsideMap(frontPosition))
+            {
+                continue;
+            }
+
+            // 通常床または出口の方向を向く
+            int tileType = map[frontPosition.y, frontPosition.x];
+
+            if (tileType == 0 || tileType == 3)
+            {
+                Vector3 lookDirection =
+                    new Vector3(direction.x, 0f, direction.y);
+
+                return Quaternion.LookRotation(lookDirection);
+            }
+        }
+
+        return Quaternion.identity;
+    }
+
+    private bool IsInsideMap(Vector2Int position)
+    {
+        return position.x >= 0 &&
+               position.x < map.GetLength(1) &&
+               position.y >= 0 &&
+               position.y < map.GetLength(0);
+    }
 
     private int CountAdjacentWalls(int x, int z)
     {

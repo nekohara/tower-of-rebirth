@@ -1,4 +1,5 @@
-using TMPro;
+ï»¿using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class DungeonManager : MonoBehaviour
@@ -31,25 +32,41 @@ public class DungeonManager : MonoBehaviour
 
     private void RefreshPlayerUI()
     {
-        if (GameManager.Instance != null)
+        GameManager gm = GameManager.Instance;
+
+        if (gm != null)
         {
-            levelText.text = $"Lv: {GameManager.Instance.playerStatus.level}";
-            expText.text = $"EXP: {GameManager.Instance.playerExp}/{GameManager.Instance.nextExp}";
-            potionText.text = $"Potion: {GameManager.Instance.potionCount}";
-            weaponText.text = $"•Ší: {GameManager.Instance.weaponName} (+{GameManager.Instance.weaponPower})";
-            armorText.text = $"–h‹ï: {GameManager.Instance.armorName} (+Defense  {GameManager.Instance.armorDefense})";
+            InventoryItem potion =
+                gm.playerStatus.inventory.Find(
+                    item => item.id == "potion");
+
+            int potionCount = potion?.count ?? 0;
+
+            if (potionText != null)
+            {
+                potionText.text = $"Potion: {potionCount}";
+            }
+
+            if (weaponText != null)
+            {
+                weaponText.text =
+                    $"æ­¦å™¨: {gm.weaponName} (+{gm.weaponPower})";
+            }
+
+            if (armorText != null)
+            {
+                armorText.text =
+                    $"é˜²å…·: {gm.armorName} (+Defense {gm.armorDefense})";
+            }
         }
 
-        int floor = 1;
+        int floor = gm?.currentDungeonFloor ?? 1;
 
-        if (GameManager.Instance != null)
+        if (dungeonNameText != null)
         {
-            floor = GameManager.Instance.currentDungeonFloor;
+            dungeonNameText.text = $"{dungeonName}:{floor}F";
         }
-
-        dungeonNameText.text = $"{dungeonName}:{floor}F";
     }
-
 
     private int GetTotalMaxHp()
     {

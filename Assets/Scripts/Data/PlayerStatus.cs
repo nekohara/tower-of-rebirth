@@ -78,7 +78,8 @@ public class PlayerStatus
             count = 3,
             healAmount = 10,
             price = 10,
-            isHealItem = true
+            isHealItem = true,
+            weight=0.5f
             }
         };
 

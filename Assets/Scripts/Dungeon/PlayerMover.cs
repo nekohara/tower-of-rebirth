@@ -212,29 +212,74 @@ public class PlayerMover : MonoBehaviour
         }
     }
 
-    private void TryMove(Vector3 direction)
+
+private TreasureBox GetTreasureBoxAt(Vector3 position)
+{
+    Collider[] hits = Physics.OverlapSphere(position, 0.6f);
+
+    foreach (Collider hit in hits)
     {
-        Vector3 nextWorldPos = transform.position + direction * moveDistance;
+        TreasureBox box =
+            hit.GetComponentInParent<TreasureBox>();
+
+        if (box != null)
+        {
+            return box;
+        }
+    }
+
+    return null;
+}
+
+private void TryMove(Vector3 direction)
+    {
+        Vector3 nextWorldPos =
+            transform.position + direction * moveDistance;
 
         Vector2Int nextGridPos = WorldToGrid(nextWorldPos);
 
-        if (dungeonGenerator.CanMoveTo(nextGridPos.x, nextGridPos.y))
+        int tileType = dungeonGenerator.GetTileType(
+            nextGridPos.x,
+            nextGridPos.y);
+
+        if (tileType == 2)
         {
-            Vector3 nextPos = dungeonGenerator.GetWorldPosition(nextGridPos.x, nextGridPos.y);
+            TreasureBox box = GetTreasureBoxAt(nextWorldPos);
+
+            if (messageText != null)
+            {
+                if (box != null && box.isOpened)
+                {
+                    messageText.text = "空の宝箱がある……";
+                }
+                else
+                {
+                    messageText.text =
+                        "宝箱を見つけた。右クリックかSpaceで開けられそうだ。";
+                }
+            }
+
+            return;
+        }
+
+        if (dungeonGenerator.CanMoveTo(
+            nextGridPos.x,
+            nextGridPos.y))
+        {
+            Vector3 nextPos = dungeonGenerator.GetWorldPosition(
+                nextGridPos.x,
+                nextGridPos.y);
+
             nextPos.y = transform.position.y;
             targetPosition = nextPos;
 
             isRotating = false;
             isMoving = true;
         }
-        else
+        else if (messageText != null)
         {
-            if (messageText != null)
-            {
-                messageText.text = "壁に阻まれている…";
-            }
+            messageText.text = "壁に阻まれている……";
         }
-
     }
 
     private Vector2Int WorldToGrid(Vector3 worldPos)
@@ -391,7 +436,11 @@ public class PlayerMover : MonoBehaviour
             TreasureBox box = hit.GetComponentInParent<TreasureBox>();
             if (box != null && !box.isOpened)
             {
-                messageText.text = "宝箱がある…";
+                if (messageText != null)
+                {
+                    messageText.text = "宝箱がある……";
+                }
+
                 return;
             }
         }
