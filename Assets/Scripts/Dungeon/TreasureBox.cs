@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using TMPro;
 using UnityEngine;
 
@@ -18,6 +18,13 @@ public class TreasureBox : MonoBehaviour
 
     [SerializeField] private GameObject closedModel;
     [SerializeField] private GameObject openedModel;
+
+    [Header("åŠ¹æœéŸ³")]
+    [SerializeField]
+    private AudioSource seAudioSource;
+
+    [SerializeField]
+    private AudioClip openTreasureSe;
 
     public void Open()
     {
@@ -54,9 +61,11 @@ public class TreasureBox : MonoBehaviour
 
         isOpened = true;
 
+        PlayOpenTreasureSe();
+
         if (messageText != null)
         {
-            messageText.text = "•ó” ‚ğŠJ‚¯‚½cc";
+            messageText.text = "å®ç®±ã‚’é–‹ã‘ãŸâ€¦â€¦";
         }
 
         if (closedModel != null)
@@ -72,12 +81,12 @@ public class TreasureBox : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
 
 
-        // ’†g”»’è
+        // ä¸­èº«åˆ¤å®š
         int luck = GameManager.Instance.playerStatus.luck;
         int rareRate = Mathf.Min(30, 5 + luck);
 
 
-        // šƒŒƒA”»’è
+        // â˜…ãƒ¬ã‚¢åˆ¤å®š
         bool isRare = Random.Range(0, 100) < rareRate;
 
 
@@ -98,11 +107,11 @@ public class TreasureBox : MonoBehaviour
                         if (messageText != null)
                         {
                             messageText.text =
-                                "ƒ|[ƒVƒ‡ƒ“‚ÌƒAƒCƒeƒ€î•ñ‚ªŒ©‚Â‚©‚ç‚È‚¢B";
+                                "ãƒãƒ¼ã‚·ãƒ§ãƒ³ã®ã‚¢ã‚¤ãƒ†ãƒ æƒ…å ±ãŒè¦‹ã¤ã‹ã‚‰ãªã„ã€‚";
                         }
 
                         Debug.LogError(
-                            "inventory‚Éid‚ªpotion‚ÌƒAƒCƒeƒ€‚ª‚ ‚è‚Ü‚¹‚ñB");
+                            "inventoryã«idãŒpotionã®ã‚¢ã‚¤ãƒ†ãƒ ãŒã‚ã‚Šã¾ã›ã‚“ã€‚");
 
                         break;
                     }
@@ -112,7 +121,7 @@ public class TreasureBox : MonoBehaviour
                         if (messageText != null)
                         {
                             messageText.text =
-                                "‰×•¨‚ªd‚·‚¬‚Äƒ|[ƒVƒ‡ƒ“‚ğ‚Ä‚È‚¢cc";
+                                "è·ç‰©ãŒé‡ã™ãã¦ãƒãƒ¼ã‚·ãƒ§ãƒ³ã‚’æŒã¦ãªã„â€¦â€¦";
                         }
 
                         break;
@@ -123,7 +132,7 @@ public class TreasureBox : MonoBehaviour
                     if (messageText != null)
                     {
                         messageText.text =
-                            $"ƒ|[ƒVƒ‡ƒ“‚ğ{count}ŒÂè‚É“ü‚ê‚½I";
+                            $"ãƒãƒ¼ã‚·ãƒ§ãƒ³ã‚’{count}å€‹æ‰‹ã«å…¥ã‚ŒãŸï¼";
                     }
 
                     break;
@@ -137,15 +146,15 @@ public class TreasureBox : MonoBehaviour
 
                 if (isRare)
                 {
-                    messageText.text = $"ƒŒƒA•ó” I{gold}ƒS[ƒ‹ƒh‚ğè‚É“ü‚ê‚½I";
+                    messageText.text = $"ãƒ¬ã‚¢å®ç®±ï¼{gold}ã‚´ãƒ¼ãƒ«ãƒ‰ã‚’æ‰‹ã«å…¥ã‚ŒãŸï¼";
                 }
                 else
                 {
                     string[] messages =
                      {
-                        $"{gold}ƒS[ƒ‹ƒh‚ğè‚É“ü‚ê‚½I",
-                        $"{gold}GƒQƒbƒgI",
-                        $"{gold}ƒS[ƒ‹ƒh‚ğ”­Œ©I"
+                        $"{gold}ã‚´ãƒ¼ãƒ«ãƒ‰ã‚’æ‰‹ã«å…¥ã‚ŒãŸï¼",
+                        $"{gold}Gã‚²ãƒƒãƒˆï¼",
+                        $"{gold}ã‚´ãƒ¼ãƒ«ãƒ‰ã‚’ç™ºè¦‹ï¼"
                     };
 
                     messageText.text = messages[Random.Range(0, messages.Length)];
@@ -158,12 +167,23 @@ public class TreasureBox : MonoBehaviour
                             - luck / 2;
 
                 damage = Mathf.Max(0, damage);
-                messageText.text = $"ã©‚¾I{damage}ƒ_ƒ[ƒW‚ğó‚¯‚½I";
+                messageText.text = $"ç½ ã ï¼{damage}ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’å—ã‘ãŸï¼";
                 GameManager.Instance.playerStatus.hp -= damage;
                 break;
         }
 
         yield return new WaitForSeconds(0.3f);
      
+    }
+
+    private void PlayOpenTreasureSe()
+    {
+        if (seAudioSource == null ||
+            openTreasureSe == null)
+        {
+            return;
+        }
+
+        seAudioSource.PlayOneShot(openTreasureSe);
     }
 }

@@ -10,6 +10,19 @@ public class SceneLoader : MonoBehaviour
     [SerializeField] private CanvasGroup fadeCanvasGroup;
     [SerializeField] private float fadeDuration = 0.5f;
 
+    [Header("Œø‰Ê‰¹")]
+    [SerializeField]
+    private AudioSource seAudioSource;
+
+    [SerializeField]
+    private AudioClip newGameSe;
+
+    [SerializeField]
+    private AudioClip enterDungeonSe;
+
+    [SerializeField]
+    private AudioClip nextFloorSe;
+
     private bool isTransitioning;
 
     private void Awake()
@@ -34,6 +47,15 @@ public class SceneLoader : MonoBehaviour
 
     public void LoadPrologue()
     {
+        if (isTransitioning)
+            return;
+
+        if (seAudioSource != null &&
+            newGameSe != null)
+        {
+            seAudioSource.PlayOneShot(newGameSe);
+        }
+
         if (GameManager.Instance != null)
         {
             GameManager.Instance.ResetDungeonProgress();
@@ -42,9 +64,36 @@ public class SceneLoader : MonoBehaviour
         LoadScene("Prologue");
     }
 
-
     public void LoadDungeon()
     {
+        LoadScene("Dungeon");
+    }
+
+    public void LoadDungeonFromTown()
+    {
+        if (isTransitioning)
+            return;
+
+        if (seAudioSource != null &&
+            enterDungeonSe != null)
+        {
+            seAudioSource.PlayOneShot(enterDungeonSe);
+        }
+
+        LoadScene("Dungeon");
+    }
+
+    public void LoadNextFloor()
+    {
+        if (isTransitioning)
+            return;
+
+        if (seAudioSource != null &&
+            nextFloorSe != null)
+        {
+            seAudioSource.PlayOneShot(nextFloorSe);
+        }
+
         LoadScene("Dungeon");
     }
 

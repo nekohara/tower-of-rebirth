@@ -25,6 +25,14 @@ public class GuildDialogueController : MonoBehaviour
     [Header("Registration Complete Dialogue")]
     [SerializeField] private DialogueLine[] registrationCompleteLines;
 
+
+    [Header("Sound Effect")]
+    [SerializeField]
+    private AudioSource seAudioSource;
+
+    [SerializeField]
+    private AudioClip guildMessageSe;
+
     private bool isRegistrationComplete;
 
     private int currentLine;
@@ -64,7 +72,8 @@ public class GuildDialogueController : MonoBehaviour
 
     private void ShowCurrentLine()
     {
-        if (dialogueLines == null || dialogueLines.Length == 0)
+        if (dialogueLines == null ||
+            dialogueLines.Length == 0)
         {
             OpenRegistrationForm();
             return;
@@ -74,6 +83,8 @@ public class GuildDialogueController : MonoBehaviour
 
         speakerNameText.text = line.speakerName;
         messageText.text = line.message;
+
+        PlayMessageSe();
     }
 
     private void ShowNextLine()
@@ -127,5 +138,16 @@ public class GuildDialogueController : MonoBehaviour
             {
                 canAdvance = true;
             });
+    }
+
+    private void PlayMessageSe()
+    {
+        if (seAudioSource == null ||
+            guildMessageSe == null)
+        {
+            return;
+        }
+
+        seAudioSource.PlayOneShot(guildMessageSe);
     }
 }

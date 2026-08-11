@@ -414,7 +414,7 @@ private void TryMove(Vector3 direction)
 
         if (SceneLoader.Instance != null)
         {
-            SceneLoader.Instance.LoadDungeon();
+            SceneLoader.Instance.LoadNextFloor();
         }
         else
         {

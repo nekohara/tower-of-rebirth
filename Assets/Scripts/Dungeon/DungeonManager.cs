@@ -1,6 +1,7 @@
 ﻿using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class DungeonManager : MonoBehaviour
 {
@@ -87,5 +88,17 @@ public class DungeonManager : MonoBehaviour
     public void OnClickStatus()
     {
         StatusManager.OpenStatus();
+    }
+
+    public void OnClickReturnToTown()
+    {
+        if (SceneLoader.Instance != null)
+        {
+            SceneLoader.Instance.LoadTown();
+        }
+        else
+        {
+            SceneManager.LoadScene("Town");
+        }
     }
 }
