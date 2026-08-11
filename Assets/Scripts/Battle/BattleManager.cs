@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
@@ -47,9 +47,9 @@ public class BattleManager : MonoBehaviour
 
     private enum ActionResult
     {
-        Success,        // s“®¬Œ÷A“Gs“®‚Ö
-        Failed,         // s“®•s¬—§AƒRƒ}ƒ“ƒh‘I‘ğ‚Ö–ß‚é
-        BattleEnded     // “¦‘–¬Œ÷‚È‚ÇAí“¬I—¹
+        Success,        // è¡Œå‹•æˆåŠŸã€æ•µè¡Œå‹•ã¸
+        Failed,         // è¡Œå‹•ä¸æˆç«‹ã€ã‚³ãƒãƒ³ãƒ‰é¸æŠã¸æˆ»ã‚‹
+        BattleEnded     // é€ƒèµ°æˆåŠŸãªã©ã€æˆ¦é—˜çµ‚äº†
     }
 
     //[CreateAssetMenu(menuName = "RPG/Enemy")]
@@ -84,8 +84,8 @@ public class BattleManager : MonoBehaviour
         public BattleCommand command;
         public int speed;
 
-        public Skill Skill;      // ƒXƒLƒ‹g—p
-        public InventoryItem Item;        // ƒAƒCƒeƒ€g—p
+        public Skill Skill;      // ã‚¹ã‚­ãƒ«ä½¿ç”¨æ™‚
+        public InventoryItem Item;        // ã‚¢ã‚¤ãƒ†ãƒ ä½¿ç”¨æ™‚
 
 
         public BattleAction(bool isPlayer, BattleCommand command, int speed)
@@ -189,32 +189,32 @@ public class BattleManager : MonoBehaviour
         InitializeBattleUI();
     }
 
-    #region ‰Šú‰»
+    #region åˆæœŸåŒ–
     private void SetupEnemy()
     {
 
         var enemies = new Enemy[]
         {
-            new Enemy("ƒXƒ‰ƒCƒ€", 10, 2, 1, 2, 3,  EnemyType.Normal){
+            new Enemy("ã‚¹ãƒ©ã‚¤ãƒ ", 10, 2, 1, 2, 3,  EnemyType.Normal){
                 battlePrefab = slimePrefab
             },
-            new Enemy("ƒSƒuƒŠƒ“", 15, 3, 2, 5, 4, EnemyType.Poison)
+            new Enemy("ã‚´ãƒ–ãƒªãƒ³", 15, 3, 2, 5, 4, EnemyType.Poison)
             {
                 battlePrefab = goblinPrefab
             },
-            new Enemy("ƒLƒmƒR", 12, 4, 3, 4, 5, EnemyType.Double)
+            new Enemy("ã‚­ãƒã‚³", 12, 4, 3, 4, 5, EnemyType.Double)
             {
                 battlePrefab=mushPrefab
             },
-            new Enemy("ƒoƒbƒg", 10, 3, 3, 3, 3, EnemyType.Paralysis)
+            new Enemy("ãƒãƒƒãƒˆ", 10, 3, 3, 3, 3, EnemyType.Paralysis)
             {
                 battlePrefab = batPrefab
             },
-            new Enemy("ƒXƒŠ[ƒvƒS[ƒXƒg", 8, 2, 2, 6, 5, EnemyType.Sleep)
+            new Enemy("ã‚¹ãƒªãƒ¼ãƒ—ã‚´ãƒ¼ã‚¹ãƒˆ", 8, 2, 2, 6, 5, EnemyType.Sleep)
             {
                 battlePrefab = gohstPrefab
             },
-            //new Enemy("ƒq[ƒ‰[ƒSƒuƒŠƒ“", 12, 2, 3, 6, 5, EnemyType.Heal)
+            //new Enemy("ãƒ’ãƒ¼ãƒ©ãƒ¼ã‚´ãƒ–ãƒªãƒ³", 12, 2, 3, 6, 5, EnemyType.Heal)
         };
 
 
@@ -243,12 +243,12 @@ public class BattleManager : MonoBehaviour
     {
 
         RefreshUI();
-        enemyText.text = $"{currentEnemy.name}‚ªŒ»‚ê‚½I";
-        messageText.text = "‚Ç‚¤‚·‚éH";
+        enemyText.text = $"{currentEnemy.name}ãŒç¾ã‚ŒãŸï¼";
+        messageText.text = "ã©ã†ã™ã‚‹ï¼Ÿ";
 
         if (GameManager.Instance != null)
         {
-            Debug.Log("Œ»İHP: " + GameManager.Instance.playerStatus.hp);
+            Debug.Log("ç¾åœ¨HP: " + GameManager.Instance.playerStatus.hp);
         }
 
         currentState = BattleState.Start;
@@ -325,7 +325,7 @@ public class BattleManager : MonoBehaviour
 
             if (buttonText != null)
             {
-                buttonText.text = $"{item.name} ~{item.count}";
+                buttonText.text = $"{item.name} Ã—{item.count}";
             }
 
             InventoryItem selectedItem = item;
@@ -372,7 +372,7 @@ public class BattleManager : MonoBehaviour
         {
             skills.Add(new Skill(
                 "power_strike",
-                "ƒpƒ[ƒXƒgƒ‰ƒCƒN",
+                "ãƒ‘ãƒ¯ãƒ¼ã‚¹ãƒˆãƒ©ã‚¤ã‚¯",
                 2,
                 0,
                 false,
@@ -381,7 +381,7 @@ public class BattleManager : MonoBehaviour
 
             skills.Add(new Skill(
                 "heal",
-                "ƒq[ƒ‹",
+                "ãƒ’ãƒ¼ãƒ«",
                 0,
                 15,
                 true,
@@ -397,7 +397,7 @@ public class BattleManager : MonoBehaviour
 
     #endregion
 
-    #region ƒRƒ}ƒ“ƒhˆ—
+    #region ã‚³ãƒãƒ³ãƒ‰å‡¦ç†
     public void Fight()
     {
         SelectCommand(BattleCommand.Attack);
@@ -470,19 +470,19 @@ public class BattleManager : MonoBehaviour
         if (currentEnemy.type == EnemyType.Poison && Random.value < 0.4f && !playerStatus.Contains(StatusEffect.Poison))
         {
             playerStatus.Add(StatusEffect.Poison);
-            return "\n“Å‚ğó‚¯‚½I";
+            return "\næ¯’ã‚’å—ã‘ãŸï¼";
         }
 
         if (currentEnemy.type == EnemyType.Paralysis && Random.value < 0.3f && !playerStatus.Contains(StatusEffect.Paralysis))
         {
             playerStatus.Add(StatusEffect.Paralysis);
-            return "\n‘Ì‚ª‚µ‚Ñ‚ê‚½I";
+            return "\nä½“ãŒã—ã³ã‚ŒãŸï¼";
         }
 
         if (currentEnemy.type == EnemyType.Sleep && Random.value < 0.3f && !playerStatus.Contains(StatusEffect.Sleep))
         {
             playerStatus.Add(StatusEffect.Sleep);
-            return "\n–°‚Á‚Ä‚µ‚Ü‚Á‚½I";
+            return "\nçœ ã£ã¦ã—ã¾ã£ãŸï¼";
         }
         return "";
     }
@@ -522,12 +522,26 @@ public class BattleManager : MonoBehaviour
 
                 BattleActionResult actionResult =  ExecutePlayerAction(action);
 
-                if (actionResult.damage > 0 &&
-                    effectController != null)
+                if (actionResult.damage > 0 &&  effectController != null)
                 {
                     yield return effectController.PlayEnemyDamage(
                         currentEnemyObject,
                         actionResult.damage
+                    );
+
+                    if (enemyHp <= 0)
+                    {
+                        yield return effectController.PlayEnemyDefeat(
+                            currentEnemyObject
+                        );
+                    }
+                }
+
+                if (actionResult.healAmount > 0 &&
+                     effectController != null)
+                {
+                    yield return effectController.PlayPlayerHeal(
+                        actionResult.healAmount
                     );
                 }
 
@@ -562,7 +576,19 @@ public class BattleManager : MonoBehaviour
             }
             else
             {
-                string enemyMessage = ExecuteEnemyTurn(false, "");
+                string enemyMessage = ExecuteEnemyTurn(
+                                        false,
+                                        "",
+                                        out int playerDamage
+                                    );
+
+                if (playerDamage > 0 &&
+                    effectController != null)
+                {
+                    yield return effectController.PlayPlayerDamage(
+                        playerDamage
+                    );
+                }
 
                 if (hasNextAction && !battleEnded)
                 {
@@ -590,7 +616,7 @@ public class BattleManager : MonoBehaviour
         currentState = BattleState.PlayerCommand;
         commandPanel.SetActive(true);
 
-        messageText.text += "\n‚Ç‚¤‚·‚éH";
+        messageText.text += "\nã©ã†ã™ã‚‹ï¼Ÿ";
 
         isDefending = false;
     }
@@ -626,11 +652,11 @@ public class BattleManager : MonoBehaviour
             if (Random.value < 0.4f)
             {
                 playerStatus.Remove(StatusEffect.Sleep);
-                messageText.text += "–Ú‚ğŠo‚Ü‚µ‚½I";
+                messageText.text += "ç›®ã‚’è¦šã¾ã—ãŸï¼";
             }
             else
             {
-                messageText.text += "–°‚Á‚Ä‚¢‚Ä“®‚¯‚È‚¢I";
+                messageText.text += "çœ ã£ã¦ã„ã¦å‹•ã‘ãªã„ï¼";
                 canAct = false;
             }
         }
@@ -641,12 +667,12 @@ public class BattleManager : MonoBehaviour
             {
                 playerStatus.Remove(StatusEffect.Paralysis);
                 if (messageText.text != "") messageText.text += "\n";
-                messageText.text += "‚µ‚Ñ‚ê‚ª¡‚Á‚½I";
+                messageText.text += "ã—ã³ã‚ŒãŒæ²»ã£ãŸï¼";
             }
             else
             {
                 if (messageText.text != "") messageText.text += "\n";
-                messageText.text += "‘Ì‚ª‚µ‚Ñ‚ê‚Ä“®‚¯‚È‚¢I";
+                messageText.text += "ä½“ãŒã—ã³ã‚Œã¦å‹•ã‘ãªã„ï¼";
                 canAct = false;
             }
         }
@@ -657,10 +683,10 @@ public class BattleManager : MonoBehaviour
     private void ApplyVictoryGrowth()
     {
 
-        // í“¬Ÿ—˜
+        // æˆ¦é—˜å‹åˆ©
         AddGrowth(StatusType.MaxHp, 1);
 
-        // •m€‚ğŒoŒ±‚µ‚ÄŸ—˜
+        // ç€•æ­»ã‚’çµŒé¨“ã—ã¦å‹åˆ©
         if (reachedCriticalHpThisBattle)
         {
             AddGrowth(StatusType.MaxHp, 2);
@@ -692,13 +718,13 @@ public class BattleManager : MonoBehaviour
     private void CheckHpGrowthConditions(int damage)
     {
 
-        // ˆê’èˆÈã‚Ìƒ_ƒ[ƒW‚ğó‚¯‚½
+        // ä¸€å®šä»¥ä¸Šã®ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’å—ã‘ãŸ
         if (damage >= GetTotalMaxHp() * 0.2f)
         {
             AddGrowth(StatusType.MaxHp, 1);
         }
 
-        // ‚±‚Ìí“¬‚Å‰‚ß‚Ä•m€‚É‚È‚Á‚½
+        // ã“ã®æˆ¦é—˜ã§åˆã‚ã¦ç€•æ­»ã«ãªã£ãŸ
         if (!reachedCriticalHpThisBattle &&
             playerHp > 0 &&
             playerHp <= GetTotalMaxHp() * 0.25f)
@@ -713,7 +739,7 @@ public class BattleManager : MonoBehaviour
         if (playerStatus.Contains(StatusEffect.Poison))
         {
             playerHp -= poisonDamage;
-            return $"\n“Å‚Å{poisonDamage}ƒ_ƒ[ƒWó‚¯‚½I";
+            return $"\næ¯’ã§{poisonDamage}ãƒ€ãƒ¡ãƒ¼ã‚¸å—ã‘ãŸï¼";
         }
 
         return "";
@@ -726,7 +752,7 @@ public class BattleManager : MonoBehaviour
 
         return new BattleActionResult(
             ActionResult.Success,
-            $"{currentEnemy.name}‚É{damage}ƒ_ƒ[ƒWI",
+            $"{currentEnemy.name}ã«{damage}ãƒ€ãƒ¡ãƒ¼ã‚¸ï¼",
             damage: damage
         );
     }
@@ -737,7 +763,7 @@ public class BattleManager : MonoBehaviour
         {
             return new BattleActionResult(
                 ActionResult.Failed,
-                "ƒXƒLƒ‹‚ª‘I‘ğ‚³‚ê‚Ä‚¢‚Ü‚¹‚ñI"
+                "ã‚¹ã‚­ãƒ«ãŒé¸æŠã•ã‚Œã¦ã„ã¾ã›ã‚“ï¼"
             );
         }
 
@@ -745,7 +771,7 @@ public class BattleManager : MonoBehaviour
         {
             return new BattleActionResult(
                 ActionResult.Failed,
-                $"{skill.name}‚Í‚à‚¤g‚¦‚È‚¢I"
+                $"{skill.name}ã¯ã‚‚ã†ä½¿ãˆãªã„ï¼"
             );
         }
 
@@ -763,19 +789,21 @@ public class BattleManager : MonoBehaviour
             int actualHealAmount = playerHp - beforeHp;
 
             return new BattleActionResult(
-                ActionResult.Success,
-                $"{skill.name}I\nHP‚ª{actualHealAmount}‰ñ•œ‚µ‚½I"
-            );
+                 ActionResult.Success,
+                 $"{skill.name}ï¼\nHPãŒ{actualHealAmount}å›å¾©ã—ãŸï¼",
+                 healAmount: actualHealAmount
+             );
         }
 
         int skillDamage = playerAttack * skill.powerMultiplier;
         enemyHp -= skillDamage;
 
         return new BattleActionResult(
-            ActionResult.Success,
-            $"{skill.name}I\n" +
-            $"{currentEnemy.name}‚É{skillDamage}ƒ_ƒ[ƒWI"
-        );
+                        ActionResult.Success,
+                        $"{skill.name}ï¼\n" +
+                        $"{currentEnemy.name}ã«{skillDamage}ãƒ€ãƒ¡ãƒ¼ã‚¸ï¼",
+                        damage: skillDamage
+                    );
     }
 
     private BattleActionResult ExecuteItem(InventoryItem item)
@@ -784,7 +812,7 @@ public class BattleManager : MonoBehaviour
         {
             return new BattleActionResult(
                 ActionResult.Failed,
-                "ƒAƒCƒeƒ€‚ğ‚Á‚Ä‚¢‚È‚¢I"
+                "ã‚¢ã‚¤ãƒ†ãƒ ã‚’æŒã£ã¦ã„ãªã„ï¼"
             );
         }
 
@@ -792,7 +820,7 @@ public class BattleManager : MonoBehaviour
         {
             return new BattleActionResult(
                 ActionResult.Failed,
-                "‚±‚ÌƒAƒCƒeƒ€‚Íg—p‚Å‚«‚È‚¢I"
+                "ã“ã®ã‚¢ã‚¤ãƒ†ãƒ ã¯ä½¿ç”¨ã§ããªã„ï¼"
             );
         }
 
@@ -800,7 +828,7 @@ public class BattleManager : MonoBehaviour
         {
             return new BattleActionResult(
                 ActionResult.Failed,
-                "HP‚Í–ƒ^ƒ“‚¾I"
+                "HPã¯æº€ã‚¿ãƒ³ã ï¼"
             );
         }
 
@@ -816,10 +844,11 @@ public class BattleManager : MonoBehaviour
         item.count--;
 
         return new BattleActionResult(
-            ActionResult.Success,
-            $"{item.name}‚ğg—p‚µ‚½I\n" +
-            $"HP‚ª{actualHealAmount}‰ñ•œ‚µ‚½I"
-        );
+                ActionResult.Success,
+                $"{item.name}ã‚’ä½¿ç”¨ã—ãŸï¼\n" +
+                $"HPãŒ{actualHealAmount}å›å¾©ã—ãŸï¼",
+                healAmount: actualHealAmount
+            );
     }
 
     private BattleActionResult ExecuteDefend()
@@ -829,7 +858,7 @@ public class BattleManager : MonoBehaviour
 
         return new BattleActionResult(
             ActionResult.Success,
-             "g‚ğç‚Á‚Ä‚¢‚éI"
+             "èº«ã‚’å®ˆã£ã¦ã„ã‚‹ï¼"
         );
     }
 
@@ -858,14 +887,14 @@ public class BattleManager : MonoBehaviour
 
             return new BattleActionResult(
              ActionResult.BattleEnded,
-              "“¦‚°o‚µ‚½I"
+              "é€ƒã’å‡ºã—ãŸï¼"
             );
         }
 
 
         return new BattleActionResult(
              ActionResult.Success,
-              "“¦‚°‚ç‚ê‚È‚©‚Á‚½I"
+              "é€ƒã’ã‚‰ã‚Œãªã‹ã£ãŸï¼"
             );
     }
   
@@ -883,7 +912,7 @@ public class BattleManager : MonoBehaviour
 
     #endregion
 
-    #region “Gˆ—
+    #region æ•µå‡¦ç†
 
 
     private IEnumerator EnemyFirstRoutine()
@@ -892,7 +921,7 @@ public class BattleManager : MonoBehaviour
 
         if (playerFirst)
         {
-            messageText.text = "æ§UŒ‚‚Ìƒ`ƒƒƒ“ƒXI\n‚Ç‚¤‚·‚éH";
+            messageText.text = "å…ˆåˆ¶æ”»æ’ƒã®ãƒãƒ£ãƒ³ã‚¹ï¼\nã©ã†ã™ã‚‹ï¼Ÿ";
             currentState = BattleState.PlayerCommand;
 
             if (commandPanel != null) commandPanel.SetActive(true);
@@ -910,17 +939,17 @@ public class BattleManager : MonoBehaviour
         if (currentEnemy.speed >= 10)
         {
             encounterMessage =
-                $"{currentEnemy.name}‚ª“dŒõÎ‰Î‚ÅP‚¢‚©‚©‚Á‚Ä‚«‚½I";
+                $"{currentEnemy.name}ãŒé›»å…‰çŸ³ç«ã§è¥²ã„ã‹ã‹ã£ã¦ããŸï¼";
         }
         else if (currentEnemy.speed >= 5)
         {
             encounterMessage =
-                $"{currentEnemy.name}‚ª‘f‘‚­“®‚¢‚½I";
+                $"{currentEnemy.name}ãŒç´ æ—©ãå‹•ã„ãŸï¼";
         }
         else
         {
             encounterMessage =
-                $"{currentEnemy.name}‚ª“®‚«o‚µ‚½I";
+                $"{currentEnemy.name}ãŒå‹•ãå‡ºã—ãŸï¼";
         }
 
         BattleMessageController messageController =
@@ -928,7 +957,20 @@ public class BattleManager : MonoBehaviour
 
         yield return messageController.ShowMessage(encounterMessage, 1.0f);
 
-        string enemyMessage = ExecuteEnemyTurn(false, "");
+        string enemyMessage =  ExecuteEnemyTurn(
+                                                    false,
+                                                    "",
+                                                    out int playerDamage
+                                                );
+
+        if (playerDamage > 0 &&
+            effectController != null)
+        {
+            yield return effectController.PlayPlayerDamage(
+                playerDamage
+            );
+        }
+
         messageText.text = enemyMessage;
 
         if (battleEnded)
@@ -943,7 +985,7 @@ public class BattleManager : MonoBehaviour
             commandPanel.SetActive(true);
         }
 
-        messageText.text += "\n‚Ç‚¤‚·‚éH";
+        messageText.text += "\nã©ã†ã™ã‚‹ï¼Ÿ";
     }
 
 
@@ -963,7 +1005,7 @@ public class BattleManager : MonoBehaviour
 
             enemyHp = Mathf.Min(enemyHp + heal, enemyMaxHp);
 
-            healMessage = $"{currentEnemy.name}‚Í‰ñ•œ‚µ‚½I(+{heal})";
+            healMessage = $"{currentEnemy.name}ã¯å›å¾©ã—ãŸï¼(+{heal})";
             return true;
         }
 
@@ -979,13 +1021,13 @@ public class BattleManager : MonoBehaviour
         if (currentEnemy.type == EnemyType.Double)
         {
             damage += enemyAttack;
-            actionMessage += "\n2‰ñUŒ‚I";
+            actionMessage += "\n2å›æ”»æ’ƒï¼";
         }
 
         if (Random.value < 0.3f)
         {
             damage *= 2;
-            actionMessage += "\n‹­UŒ‚I";
+            actionMessage += "\nå¼·æ”»æ’ƒï¼";
         }
 
 
@@ -993,9 +1035,11 @@ public class BattleManager : MonoBehaviour
     }
 
 
-    private string ExecuteEnemyTurn(bool acted, string prefixMessage)
+    private string ExecuteEnemyTurn(bool acted, string prefixMessage, out int playerDamage)
     {
         string resultMessage = "";
+
+        playerDamage = 0;
 
         bool didHeal = TryEnemyHeal(out string healMessage);
 
@@ -1011,7 +1055,7 @@ public class BattleManager : MonoBehaviour
         {
             damage = CalculateEnemyDamage(out msg);
 
-            // –h‹ï‚É‚æ‚éƒ_ƒ[ƒWŒyŒ¸
+            // é˜²å…·ã«ã‚ˆã‚‹ãƒ€ãƒ¡ãƒ¼ã‚¸è»½æ¸›
             if (GameManager.Instance != null)
             {
                 damage = Mathf.Max(
@@ -1040,7 +1084,9 @@ public class BattleManager : MonoBehaviour
             }
 
 
-                playerHp -= damage;
+            playerHp -= damage;
+            playerDamage = damage;
+
             CheckHpGrowthConditions(damage);
         }
 
@@ -1056,15 +1102,15 @@ public class BattleManager : MonoBehaviour
         {
             if (acted)
             {
-                resultMessage += $"{currentEnemy.name}‚Ì”½Œ‚I";
+                resultMessage += $"{currentEnemy.name}ã®åæ’ƒï¼";
             }
             else
             {
-                resultMessage += $"{currentEnemy.name}‚ÌUŒ‚I";
+                resultMessage += $"{currentEnemy.name}ã®æ”»æ’ƒï¼";
             }
 
             resultMessage += msg;
-            resultMessage += $"\n{damage}ƒ_ƒ[ƒWI";
+            resultMessage += $"\n{damage}ãƒ€ãƒ¡ãƒ¼ã‚¸ï¼";
         }
 
         resultMessage += statusMsg;
@@ -1075,7 +1121,7 @@ public class BattleManager : MonoBehaviour
         if (playerStatus.Contains(StatusEffect.Sleep) && damage > 0)
         {
             playerStatus.Remove(StatusEffect.Sleep);
-            resultMessage += "\n’É‚İ‚Å–Ú‚ğŠo‚Ü‚µ‚½I";
+            resultMessage += "\nç—›ã¿ã§ç›®ã‚’è¦šã¾ã—ãŸï¼";
         }
 
         if (playerHp <= 0)
@@ -1083,7 +1129,7 @@ public class BattleManager : MonoBehaviour
             playerHp = 0;
             battleEnded = true;
             RefreshUI();
-            resultMessage += "\n‚â‚ç‚ê‚Ä‚µ‚Ü‚Á‚½c";
+            resultMessage += "\nã‚„ã‚‰ã‚Œã¦ã—ã¾ã£ãŸâ€¦";
             //Invoke(nameof(ReturnToDungeon), 1.5f);
 
             EndBattle(false);
@@ -1100,7 +1146,7 @@ public class BattleManager : MonoBehaviour
     }
     #endregion
 
-    #region ƒVƒXƒeƒ€ˆ—
+    #region ã‚·ã‚¹ãƒ†ãƒ å‡¦ç†
     private bool CheckPlayerFirst()
     {
         int playerSpeed = GameManager.Instance.playerStatus.GetEffectiveSpeed();
@@ -1121,7 +1167,7 @@ public class BattleManager : MonoBehaviour
             return "";
         }
 
-        string message = "\n\n”\—Í‚ª¬’·‚µ‚½I";
+        string message = "\n\nèƒ½åŠ›ãŒæˆé•·ã—ãŸï¼";
 
         var groupedResults = growthResults
             .GroupBy(result => result.type)
@@ -1135,17 +1181,17 @@ public class BattleManager : MonoBehaviour
         {
             string statusName = result.Type switch
             {
-                StatusType.MaxHp => "Å‘åHP",
-                StatusType.Strength => "˜r—Í",
-                StatusType.Vitality => "‘Ì—Í",
-                StatusType.Speed => "‘f‘‚³",
-                StatusType.Dexterity => "Ší—p‚³",
-                StatusType.Intelligence => "’m—Í",
-                StatusType.Luck => "‰^",
+                StatusType.MaxHp => "æœ€å¤§HP",
+                StatusType.Strength => "è…•åŠ›",
+                StatusType.Vitality => "ä½“åŠ›",
+                StatusType.Speed => "ç´ æ—©ã•",
+                StatusType.Dexterity => "å™¨ç”¨ã•",
+                StatusType.Intelligence => "çŸ¥åŠ›",
+                StatusType.Luck => "é‹",
                 _ => result.Type.ToString()
             };
 
-            message += $"\n{statusName}‚ª{result.Amount}ã‚ª‚Á‚½I";
+            message += $"\n{statusName}ãŒ{result.Amount}ä¸ŠãŒã£ãŸï¼";
         }
 
         return message;
@@ -1165,8 +1211,8 @@ public class BattleManager : MonoBehaviour
         ApplyVictoryGrowth();
 
         message =
-            $"{currentEnemy.name}‚ğ“|‚µ‚½I\n" +
-            $"{currentEnemy.gold}G‚ğè‚É“ü‚ê‚½I";
+            $"{currentEnemy.name}ã‚’å€’ã—ãŸï¼\n" +
+            $"{currentEnemy.gold}Gã‚’æ‰‹ã«å…¥ã‚ŒãŸï¼";
 
         if (GameManager.Instance != null)
         {
@@ -1196,8 +1242,8 @@ public class BattleManager : MonoBehaviour
             levelText.text = $"Lv: {GameManager.Instance.playerStatus.level}";
             expText.text = $"EXP: {GameManager.Instance.playerExp}/{GameManager.Instance.nextExp}";
             
-            weaponText.text = $"•Ší: {GameManager.Instance.weaponName} (+{GameManager.Instance.weaponPower})";
-            armorText.text =  $"–h‹ï: {GameManager.Instance.armorName} (+Defense {GameManager.Instance.armorDefense})";
+            weaponText.text = $"æ­¦å™¨: {GameManager.Instance.weaponName} (+{GameManager.Instance.weaponPower})";
+            armorText.text =  $"é˜²å…·: {GameManager.Instance.armorName} (+Defense {GameManager.Instance.armorDefense})";
 
             var potion = GameManager.Instance.playerStatus.inventory .FirstOrDefault(x => x.id == "potion");
 
@@ -1218,13 +1264,13 @@ public class BattleManager : MonoBehaviour
                     StatusText.text = "";
                     break;
                 case StatusEffect.Poison:
-                    StatusText.text += "“Å ";
+                    StatusText.text += "æ¯’ ";
                     break;
                 case StatusEffect.Paralysis:
-                    StatusText.text += "–ƒáƒ ";
+                    StatusText.text += "éº»ç—º ";
                     break;
                 case StatusEffect.Sleep:
-                    StatusText.text += "‡–° ";
+                    StatusText.text += "ç¡çœ  ";
                     break;
             }
         }
