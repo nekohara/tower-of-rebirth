@@ -60,12 +60,31 @@ public class BattleEffectController : MonoBehaviour
     [SerializeField]
     private float enemyDefeatMoveDistance = 0.5f;
 
+    [Header("効果音")]
+    [SerializeField]
+    private AudioSource seAudioSource;
+
+    [SerializeField]
+    private AudioClip playerAttackSe;
+
+    [SerializeField]
+    private AudioClip playerDamageSe;
+
+    [SerializeField]
+    private AudioClip playerHealSe;
+
+    [SerializeField]
+    private AudioClip enemyDefeatSe;
+
     public IEnumerator PlayEnemyDamage(
         GameObject enemyObject,
         int damage)
     {
         if (enemyObject == null)
             yield break;
+
+
+        PlaySe(playerAttackSe);
 
         Color damageTextColor =
             damageTextPrefab != null
@@ -134,6 +153,9 @@ public class BattleEffectController : MonoBehaviour
 
     public IEnumerator PlayPlayerDamage(int damage)
     {
+
+        PlaySe(playerDamageSe);
+
         Coroutine textCoroutine = StartCoroutine(
             PlayFloatingText(
                 damage,
@@ -177,6 +199,9 @@ public class BattleEffectController : MonoBehaviour
 
     public IEnumerator PlayPlayerHeal(int healAmount)
     {
+
+        PlaySe(playerHealSe);
+
         yield return PlayFloatingText(
             healAmount,
             healTextParent,
@@ -239,6 +264,8 @@ public class BattleEffectController : MonoBehaviour
         if (enemyObject == null)
             yield break;
 
+        PlaySe(enemyDefeatSe);
+
         Transform enemyTransform = enemyObject.transform;
 
         Vector3 startPosition = enemyTransform.localPosition;
@@ -267,5 +294,16 @@ public class BattleEffectController : MonoBehaviour
 
         enemyTransform.localScale = Vector3.zero;
         enemyObject.SetActive(false);
+    }
+
+    private void PlaySe(AudioClip audioClip)
+    {
+        if (seAudioSource == null ||
+            audioClip == null)
+        {
+            return;
+        }
+
+        seAudioSource.PlayOneShot(audioClip);
     }
 }

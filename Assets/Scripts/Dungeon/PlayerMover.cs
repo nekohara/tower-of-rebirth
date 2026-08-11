@@ -305,7 +305,7 @@ private void TryMove(Vector3 direction)
 
                 if (audioSource != null && footstepSE != null)
                 {
-                    audioSource.PlayOneShot(footstepSE);
+                    //audioSource.PlayOneShot(footstepSE);
                     StartCoroutine(StopSE(0.2f));
                 }
             }
