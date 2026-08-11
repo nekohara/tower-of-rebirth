@@ -92,6 +92,14 @@ public class DungeonManager : MonoBehaviour
 
     public void OnClickReturnToTown()
     {
+        GameManager gm = GameManager.Instance;
+
+        if (gm != null)
+        {
+            // 戦闘復帰用の位置を町への帰還時には破棄する
+            gm.hasDungeonPosition = false;
+        }
+
         if (SceneLoader.Instance != null)
         {
             SceneLoader.Instance.LoadTown();

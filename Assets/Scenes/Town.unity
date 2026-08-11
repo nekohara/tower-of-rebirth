@@ -896,6 +896,7 @@ MonoBehaviour:
   seAudioSource: {fileID: 1260603921}
   newGameSe: {fileID: 8300000, guid: 5629431361589c545b23a7205bbe3da8, type: 3}
   enterDungeonSe: {fileID: 8300000, guid: 182d575457ffa6a46ac24608b916b7e5, type: 3}
+  nextFloorSe: {fileID: 0}
 --- !u!4 &535518296
 Transform:
   m_ObjectHideFlags: 0
@@ -4365,9 +4366,9 @@ RectTransform:
   - {fileID: 854151087}
   m_Father: {fileID: 2011298467}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 1}
-  m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: -881}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0}
+  m_AnchoredPosition: {x: 0, y: 199}
   m_SizeDelta: {x: 1920, y: 400}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1777151922
@@ -5037,9 +5038,9 @@ RectTransform:
   - {fileID: 911254838}
   m_Father: {fileID: 2011298467}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 1693, y: -472}
+  m_AnchorMin: {x: 1, y: 1}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: -227, y: -472}
   m_SizeDelta: {x: 400, y: 400}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2131191131

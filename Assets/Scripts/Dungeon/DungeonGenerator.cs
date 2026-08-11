@@ -49,9 +49,14 @@ public class DungeonGenerator : MonoBehaviour
 
         var gm = GameManager.Instance;
 
-        if (gm != null && gm.hasDungeonMap && gm.currentDungeonMap != null)
+        if (gm != null &&
+            gm.hasDungeonMap &&
+             gm.currentDungeonMap != null)
         {
             map = gm.currentDungeonMap;
+
+            // 保存したマップを生成したときの開始地点も復元する
+            startPosition = gm.dungeonStartPosition;
         }
         else
         {
@@ -60,6 +65,7 @@ public class DungeonGenerator : MonoBehaviour
             if (gm != null)
             {
                 gm.currentDungeonMap = map;
+                gm.dungeonStartPosition = startPosition;
                 gm.hasDungeonMap = true;
             }
         }

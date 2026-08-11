@@ -39,15 +39,15 @@ public class GameManager : MonoBehaviour
 
     public List<Armor> ownedArmors = new List<Armor>()
 {
-    new Armor("なし", 0, 0),
-    new Armor("レザーアーマー", 50, 2)
+    new Armor("なし", 0, 0)
 };
 
     public List<Weapon> ownedWeapons = new List<Weapon>()
 {
-    new Weapon("なし", 0, 0),
-    new Weapon("ショートソード", 50, 2)
+    new Weapon("なし", 0, 0)
 };
+
+    public Vector2Int dungeonStartPosition;
 
     private void Awake()
     {
@@ -76,6 +76,7 @@ public class GameManager : MonoBehaviour
         hasDungeonMap = false;
         hasDungeonPosition = false;
         dungeonPlayerGridPos = Vector2Int.zero;
+        dungeonStartPosition = Vector2Int.zero;
     }
 
     public void ResetGameProgress()
