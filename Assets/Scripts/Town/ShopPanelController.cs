@@ -10,6 +10,12 @@ public class ShopPanelController : MonoBehaviour
     [SerializeField] private List<ShopProduct> products;
     [SerializeField] private TownManager townManager;
 
+    [Header("å¯â âπ")]
+    [SerializeField]
+    private AudioSource seAudioSource;
+
+    [SerializeField]
+    private AudioClip purchaseSe;
     public void CreateProductButtons()
     {
         foreach (Transform child in content)
@@ -110,6 +116,8 @@ public class ShopPanelController : MonoBehaviour
                 break;
         }
 
+        PlayPurchaseSe();
+
         townManager.SetMessage(
             $"{product.ProductName}Ççwì¸ÇµÇΩÅI");
 
@@ -157,5 +165,16 @@ public class ShopPanelController : MonoBehaviour
 
         item.count = 1;
         status.inventory.Add(item);
+    }
+
+    private void PlayPurchaseSe()
+    {
+        if (seAudioSource == null ||
+            purchaseSe == null)
+        {
+            return;
+        }
+
+        seAudioSource.PlayOneShot(purchaseSe);
     }
 }

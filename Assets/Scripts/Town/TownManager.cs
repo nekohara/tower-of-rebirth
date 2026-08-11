@@ -30,6 +30,13 @@ public class TownManager : MonoBehaviour
     [SerializeField]
     private ShopPanelController armorShopController;
 
+    [Header("効果音")]
+    [SerializeField]
+    private AudioSource seAudioSource;
+
+    [SerializeField]
+    private AudioClip innSe;
+
     private void Start()
     {
         ShowMainCommands();
@@ -38,16 +45,20 @@ public class TownManager : MonoBehaviour
 
     public void Rest()
     {
-        if (GameManager.Instance == null) return;
+        if (GameManager.Instance == null)
+            return;
 
         if (GameManager.Instance.playerStatus.gold >= restCost)
         {
             GameManager.Instance.playerStatus.gold -= restCost;
             GameManager.Instance.playerStatus.hp = GetTotalMaxHp();
 
+            PlayInnSe();
+
             if (messageText != null)
             {
-                messageText.text = $"{restCost}G払って休んだ。体力が回復した！";
+                messageText.text =
+                    $"{restCost}G払って休んだ。体力が回復した！";
             }
         }
         else
@@ -61,9 +72,13 @@ public class TownManager : MonoBehaviour
         RefreshUI();
     }
 
+
     public void OnClickDungeon()
     {
-        SceneLoader.Instance.LoadDungeon();
+        if (SceneLoader.Instance == null)
+            return;
+
+        SceneLoader.Instance.LoadDungeonFromTown();
     }
 
     private int GetTotalMaxHp()
@@ -154,5 +169,16 @@ public class TownManager : MonoBehaviour
     {
         if (messageText != null)
             messageText.text = message;
+    }
+
+    private void PlayInnSe()
+    {
+        if (seAudioSource == null ||
+            innSe == null)
+        {
+            return;
+        }
+
+        seAudioSource.PlayOneShot(innSe);
     }
 }

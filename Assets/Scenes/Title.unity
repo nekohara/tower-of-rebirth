@@ -306,9 +306,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2111059752}
-        m_TargetAssemblyTypeName: SceneLoader, Assembly-CSharp
-        m_MethodName: LoadPrologue
+      - m_Target: {fileID: 408767882}
+        m_TargetAssemblyTypeName: TitleManager, Assembly-CSharp
+        m_MethodName: OnClickNewGame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -356,6 +356,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 137830540}
   m_CullTransparentMesh: 1
+--- !u!1 &408767881
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 408767883}
+  - component: {fileID: 408767882}
+  m_Layer: 0
+  m_Name: TitleManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &408767882
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 408767881}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8644726d8dcfd184284cdcec8d176571, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TitleManager
+--- !u!4 &408767883
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 408767881}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -382.4004, y: -0.00004, z: 2577.5085}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &632426756
 GameObject:
   m_ObjectHideFlags: 0
@@ -865,7 +909,7 @@ MonoBehaviour:
   weaponName: "\u306A\u3057"
   weaponPower: 0
   armorName: "\u306A\u3057"
-  armorHpBonus: 0
+  armorDefense: 0
   hasDungeonPosition: 0
   dungeonPlayerPosition: {x: 0, y: 0.5, z: 0}
   dungeonPlayerRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -917,6 +961,22 @@ MonoBehaviour:
       weight: 0
       healAmount: 10
       isHealItem: 1
+      price: 10
+  currentDungeonFloor: 1
+  ownedArmors:
+  - name: "\u306A\u3057"
+    price: 0
+    defense: 0
+  - name: "\u30EC\u30B6\u30FC\u30A2\u30FC\u30DE\u30FC"
+    price: 50
+    defense: 2
+  ownedWeapons:
+  - name: "\u306A\u3057"
+    price: 0
+    power: 0
+  - name: "\u30B7\u30E7\u30FC\u30C8\u30BD\u30FC\u30C9"
+    price: 50
+    power: 2
 --- !u!4 &1423033037
 Transform:
   m_ObjectHideFlags: 0
@@ -1481,6 +1541,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2111059753}
   - component: {fileID: 2111059752}
+  - component: {fileID: 2111059754}
   m_Layer: 0
   m_Name: SceneLoader
   m_TagString: Untagged
@@ -1502,6 +1563,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SceneLoader
   fadeCanvasGroup: {fileID: 632426757}
   fadeDuration: 0.5
+  seAudioSource: {fileID: 2111059754}
+  newGameSe: {fileID: 8300000, guid: 5629431361589c545b23a7205bbe3da8, type: 3}
+  enterDungeonSe: {fileID: 8300000, guid: 182d575457ffa6a46ac24608b916b7e5, type: 3}
+  nextFloorSe: {fileID: 8300000, guid: 445c53c7c0d3d264e8f68b8bc998a27c, type: 3}
 --- !u!4 &2111059753
 Transform:
   m_ObjectHideFlags: 0
@@ -1518,6 +1583,103 @@ Transform:
   - {fileID: 1244008759}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!82 &2111059754
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2111059751}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 0
+  m_Volume: 0.7
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1528,3 +1690,4 @@ SceneRoots:
   - {fileID: 1221722084}
   - {fileID: 2111059753}
   - {fileID: 1423033037}
+  - {fileID: 408767883}
