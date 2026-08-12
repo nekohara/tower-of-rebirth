@@ -120,7 +120,6 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private TMP_Text enemyText;
     [SerializeField] private TMP_Text messageText;
     [SerializeField] private TMP_Text enemyHpText;
-    [SerializeField] private TMP_Text levelText;
     [SerializeField] private TMP_Text potionText;
     [SerializeField] private TMP_Text weaponText;
     [SerializeField] private TMP_Text armorText;
@@ -1233,10 +1232,9 @@ public class BattleManager : MonoBehaviour
 
         if (GameManager.Instance != null)
         {
-            levelText.text = $"Lv: {GameManager.Instance.playerStatus.level}";
             
             weaponText.text = $"武器: {GameManager.Instance.weaponName} (+{GameManager.Instance.weaponPower})";
-            armorText.text =  $"防具: {GameManager.Instance.armorName} (+Defense {GameManager.Instance.armorDefense})";
+            armorText.text =  $"防具: {GameManager.Instance.armorName} (+{GameManager.Instance.armorDefense})";
 
             var potion = GameManager.Instance.playerStatus.inventory .FirstOrDefault(x => x.id == "potion");
 

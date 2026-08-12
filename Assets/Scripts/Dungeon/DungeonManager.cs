@@ -57,7 +57,7 @@ public class DungeonManager : MonoBehaviour
             if (armorText != null)
             {
                 armorText.text =
-                    $"防具: {gm.armorName} (+Defense {gm.armorDefense})";
+                    $"防具: {gm.armorName} (+{gm.armorDefense})";
             }
         }
 
