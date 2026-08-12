@@ -34,6 +34,8 @@ public class StatusManager : MonoBehaviour
 
     private static string sourceSceneName;
 
+    private static bool isOpeningStatus;
+
     private void Start()
     {
         InitializeEquipmentDropdowns();
@@ -145,49 +147,117 @@ public class StatusManager : MonoBehaviour
 
     public static void OpenStatus()
     {
+        if (isOpeningStatus)
+        {
+            return;
+        }
+
         Scene sourceScene = SceneManager.GetActiveScene();
 
         if (sourceScene.name == "Status")
+        {
             return;
+        }
 
+        isOpeningStatus = true;
         sourceSceneName = sourceScene.name;
         hiddenSceneRoots.Clear();
-
-        // Statusを読み込む前に、元シーンで有効なルートだけ記録
         foreach (GameObject root in sourceScene.GetRootGameObjects())
         {
             if (root.activeSelf)
+            {
                 hiddenSceneRoots.Add(root);
+
+                // Statusを読み込む前に元シーンを無効化
+                root.SetActive(false);
+            }
         }
 
-        SceneManager.LoadScene("Status", LoadSceneMode.Additive);
+        AsyncOperation loadOperation =
+            SceneManager.LoadSceneAsync(
+                "Status",
+                LoadSceneMode.Additive);
 
-        foreach (GameObject root in hiddenSceneRoots)
-            root.SetActive(false);
+        if (loadOperation == null)
+        {
+            Debug.LogError(
+                "Statusシーンのロードを開始できませんでした。");
 
-        Scene statusScene = SceneManager.GetSceneByName("Status");
+            foreach (GameObject root in hiddenSceneRoots)
+            {
+                if (root != null)
+                {
+                    root.SetActive(true);
+                }
+            }
 
-        if (statusScene.IsValid())
+            hiddenSceneRoots.Clear();
+            isOpeningStatus = false;
+            return;
+        }
+
+        loadOperation.completed += _ =>
+        {
+            Scene statusScene =
+                SceneManager.GetSceneByName("Status");
+
+            if (!statusScene.IsValid() ||
+                 !statusScene.isLoaded)
+            {
+                Debug.LogError(
+                    "Statusシーンのロードに失敗しました。");
+
+                foreach (GameObject root in hiddenSceneRoots)
+                {
+                    if (root != null)
+                    {
+                        root.SetActive(true);
+                    }
+                }
+
+                hiddenSceneRoots.Clear();
+                isOpeningStatus = false;
+                return;
+            }
             SceneManager.SetActiveScene(statusScene);
+            isOpeningStatus = false;
+        };
     }
 
     public void OnClickBack()
     {
         Scene statusScene = gameObject.scene;
 
-        foreach (GameObject root in hiddenSceneRoots)
+        Scene sourceScene =
+            SceneManager.GetSceneByName(sourceSceneName);
+
+        if (sourceScene.IsValid() &&
+            sourceScene.isLoaded)
         {
-            if (root != null)
-                root.SetActive(true);
+            SceneManager.SetActiveScene(sourceScene);
         }
 
-        hiddenSceneRoots.Clear();
+        AsyncOperation unloadOperation =
+            SceneManager.UnloadSceneAsync(statusScene);
 
-        Scene sourceScene = SceneManager.GetSceneByName(sourceSceneName);
+        if (unloadOperation == null)
+        {
+            Debug.LogError(
+                "Statusシーンのアンロードを開始できませんでした。");
+            return;
+        }
 
-        if (sourceScene.IsValid())
-            SceneManager.SetActiveScene(sourceScene);
+        unloadOperation.completed += _ =>
+        {
+            foreach (GameObject root in hiddenSceneRoots)
+            {
+                if (root != null)
+                {
+                    root.SetActive(true);
+                }
+            }
 
-        SceneManager.UnloadSceneAsync(statusScene);
+            hiddenSceneRoots.Clear();
+        };
     }
 }

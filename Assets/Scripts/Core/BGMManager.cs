@@ -71,8 +71,10 @@ public class BGMManager : MonoBehaviour
 
             case "PlayerCreation":
             case "Town":
-            case "Status":
                 Play(townBgm);
+                break;
+
+            case "Status":
                 break;
 
             case "Dungeon":

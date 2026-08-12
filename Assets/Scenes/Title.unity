@@ -518,7 +518,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 961ef502ba990b846bdbfb1d8663ab59, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BGMManager
-  audioSource: {fileID: 0}
+  audioSource: {fileID: 972936252}
+  titleBgm: {fileID: 8300000, guid: 7c1075a411dc819428e615122a605683, type: 3}
+  townBgm: {fileID: 8300000, guid: 4acc3cfd838078d4f9f40e57e667becc, type: 3}
+  dungeonBgm: {fileID: 8300000, guid: 4956d0403a3222a498b93419c03230f1, type: 3}
+  battleBgm: {fileID: 8300000, guid: 963f07052b1942a4793242352c4c6637, type: 3}
 --- !u!82 &972936252
 AudioSource:
   m_ObjectHideFlags: 0
