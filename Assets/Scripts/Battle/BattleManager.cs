@@ -58,7 +58,6 @@ public class BattleManager : MonoBehaviour
         public string name;
         public int hp;
         public int attack;
-        public int exp;
         public int gold;
         public int speed;
         public EnemyType type;
@@ -66,12 +65,11 @@ public class BattleManager : MonoBehaviour
         public int defense = 1;
     
 
-        public Enemy(string name, int hp, int attack, int speed, int exp, int gold, EnemyType type)
+        public Enemy(string name, int hp, int attack, int speed, int gold, EnemyType type)
         {
             this.name = name;
             this.hp = hp;
             this.attack = attack;
-            this.exp = exp;
             this.gold = gold;
             this.type = type;
             this.speed = speed;
@@ -123,7 +121,6 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private TMP_Text messageText;
     [SerializeField] private TMP_Text enemyHpText;
     [SerializeField] private TMP_Text levelText;
-    [SerializeField] private TMP_Text expText;
     [SerializeField] private TMP_Text potionText;
     [SerializeField] private TMP_Text weaponText;
     [SerializeField] private TMP_Text armorText;
@@ -195,22 +192,22 @@ public class BattleManager : MonoBehaviour
 
         var enemies = new Enemy[]
         {
-            new Enemy("スライム", 10, 2, 1, 2, 3,  EnemyType.Normal){
+            new Enemy("スライム", 10, 2, 1, 3,  EnemyType.Normal){
                 battlePrefab = slimePrefab
             },
-            new Enemy("ゴブリン", 15, 3, 2, 5, 4, EnemyType.Poison)
+            new Enemy("ゴブリン", 15, 3, 2, 4, EnemyType.Poison)
             {
                 battlePrefab = goblinPrefab
             },
-            new Enemy("キノコ", 12, 4, 3, 4, 5, EnemyType.Double)
+            new Enemy("キノコ", 12, 4, 3, 5, EnemyType.Double)
             {
                 battlePrefab=mushPrefab
             },
-            new Enemy("バット", 10, 3, 3, 3, 3, EnemyType.Paralysis)
+            new Enemy("バット", 10, 3, 3, 3, EnemyType.Paralysis)
             {
                 battlePrefab = batPrefab
             },
-            new Enemy("スリープゴースト", 8, 2, 2, 6, 5, EnemyType.Sleep)
+            new Enemy("スリープゴースト", 8, 2, 2, 5, EnemyType.Sleep)
             {
                 battlePrefab = gohstPrefab
             },
@@ -225,8 +222,7 @@ public class BattleManager : MonoBehaviour
         int levelBonus = Mathf.Max(0, level - 1);
         enemyHp = currentEnemy.hp + levelBonus * 2;
         enemyAttack = currentEnemy.attack + levelBonus;
-        currentEnemy.exp += levelBonus;
-
+       
         enemyMaxHp = currentEnemy.hp + levelBonus * 2;
         enemyHp = enemyMaxHp;
 
@@ -1217,9 +1213,7 @@ public class BattleManager : MonoBehaviour
         if (GameManager.Instance != null)
         {
             GameManager.Instance.playerStatus.hp = playerHp;
-            GameManager.Instance.playerExp += currentEnemy.exp;
-            GameManager.Instance.playerGold += currentEnemy.gold;
-
+            GameManager.Instance.playerStatus.gold += currentEnemy.gold;
         }
 
         message += GetGrowthResultMessage();
@@ -1240,7 +1234,6 @@ public class BattleManager : MonoBehaviour
         if (GameManager.Instance != null)
         {
             levelText.text = $"Lv: {GameManager.Instance.playerStatus.level}";
-            expText.text = $"EXP: {GameManager.Instance.playerExp}/{GameManager.Instance.nextExp}";
             
             weaponText.text = $"武器: {GameManager.Instance.weaponName} (+{GameManager.Instance.weaponPower})";
             armorText.text =  $"防具: {GameManager.Instance.armorName} (+Defense {GameManager.Instance.armorDefense})";

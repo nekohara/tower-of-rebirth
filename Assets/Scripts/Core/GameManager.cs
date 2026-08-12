@@ -5,8 +5,6 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
-    public int playerExp = 0;
-    public int nextExp = 10;
     public int potionCount = 3;
 
     /// <summary>
@@ -26,9 +24,9 @@ public class GameManager : MonoBehaviour
     public Vector3 dungeonPlayerPosition = new Vector3(0f, 0.5f, 0f);
     public Quaternion dungeonPlayerRotation = Quaternion.identity;
 
-    public int playerGold = 10;
-
     public int[,] currentDungeonMap;
+    public bool[,] dungeonExploredTiles;
+
     public bool hasDungeonMap = false;
 
     public Vector2Int dungeonPlayerGridPos;
@@ -77,12 +75,12 @@ public class GameManager : MonoBehaviour
         hasDungeonPosition = false;
         dungeonPlayerGridPos = Vector2Int.zero;
         dungeonStartPosition = Vector2Int.zero;
+        dungeonExploredTiles = null;
     }
+
 
     public void ResetGameProgress()
     {
-        playerExp = 0;
-        nextExp = 10;
         potionCount = 3;
 
         weaponName = "なし";
@@ -91,7 +89,6 @@ public class GameManager : MonoBehaviour
         armorName = "なし";
         armorDefense = 0;
 
-        playerGold = 10;
         playerStatus = new PlayerStatus();
 
         //EquipArmor(new Armor("レザーアーマー", 50, 2));

@@ -179,7 +179,6 @@ public class PlayerCreationController : MonoBehaviour
         };
 
         GameManager.Instance.playerStatus = status;
-        GameManager.Instance.playerExp = 0;
         GameManager.Instance.hasDungeonPosition = false;
         GameManager.Instance.hasDungeonMap = false;
 

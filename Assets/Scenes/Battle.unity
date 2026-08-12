@@ -2055,8 +2055,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: New Text
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: f93af7b2561e8f049b9a373fbf3bab93, type: 2}
-  m_sharedMaterial: {fileID: -7438076260516643881, guid: f93af7b2561e8f049b9a373fbf3bab93, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 95b6677e26cf3514dba6e09dab7e7a5d, type: 2}
+  m_sharedMaterial: {fileID: 6940251488805533015, guid: 95b6677e26cf3514dba6e09dab7e7a5d, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -3680,6 +3680,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SceneLoader
   fadeCanvasGroup: {fileID: 0}
   fadeDuration: 0.5
+  seAudioSource: {fileID: 0}
+  newGameSe: {fileID: 0}
+  enterDungeonSe: {fileID: 0}
+  nextFloorSe: {fileID: 0}
 --- !u!4 &1004515908
 Transform:
   m_ObjectHideFlags: 0

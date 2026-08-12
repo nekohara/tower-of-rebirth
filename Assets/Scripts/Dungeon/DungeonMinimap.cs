@@ -102,12 +102,32 @@ public class DungeonMinimap : MonoBehaviour
         }
     }
 
-
     private void ResetExploration()
     {
-        exploredTiles = new bool[
-            dungeonGenerator.MapHeight,
-            dungeonGenerator.MapWidth];
+        int height = dungeonGenerator.MapHeight;
+        int width = dungeonGenerator.MapWidth;
+
+        GameManager gm = GameManager.Instance;
+
+        bool canRestore =
+            gm != null &&
+            gm.dungeonExploredTiles != null &&
+            gm.dungeonExploredTiles.GetLength(0) == height &&
+            gm.dungeonExploredTiles.GetLength(1) == width;
+
+        if (canRestore)
+        {
+            exploredTiles = gm.dungeonExploredTiles;
+        }
+        else
+        {
+            exploredTiles = new bool[height, width];
+
+            if (gm != null)
+            {
+                gm.dungeonExploredTiles = exploredTiles;
+            }
+        }
 
         lastGenerationVersion =
             dungeonGenerator.GenerationVersion;

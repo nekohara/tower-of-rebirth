@@ -404,12 +404,12 @@ private void TryMove(Vector3 direction)
         {
             gm.currentDungeonFloor++;
 
-            // 次のフロアでは新しいマップを生成する
             gm.currentDungeonMap = null;
             gm.hasDungeonMap = false;
-
-            // 前フロアの位置を復元しない
             gm.hasDungeonPosition = false;
+
+            // 新しい階層なので探索状態もリセット
+            gm.dungeonExploredTiles = null;
         }
 
         if (SceneLoader.Instance != null)
