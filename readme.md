@@ -64,4 +64,3 @@ Assets / Packages / ProjectSettings をGitで管理
 C# / Unity 関連のご相談対応可能です。
 バグ修正・コード改善などお気軽にご相談ください。
 
-https://coconala.com/users/5971304
