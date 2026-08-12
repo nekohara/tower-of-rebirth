@@ -81,6 +81,7 @@
     <Compile Include="Assets\Scripts\Data\Weapon.cs" />
     <Compile Include="Assets\Scripts\Core\StatusUI.cs" />
     <Compile Include="Assets\Scripts\Dungeon\DungeonPlayerRestore.cs" />
+    <Compile Include="Assets\Scripts\Core\BGMManager.cs" />
     <Compile Include="Assets\Scripts\Battle\BattleEffectController.cs" />
     <Compile Include="Assets\Scripts\Data\Item.cs" />
     <Compile Include="Assets\Scripts\Data\Armor.cs" />
