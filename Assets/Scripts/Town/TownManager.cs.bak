@@ -53,17 +53,12 @@ public class TownManager : MonoBehaviour
             GameManager.Instance.playerStatus.gold -= restCost;
             GameManager.Instance.playerStatus.hp = GetTotalMaxHp();
 
-            foreach (Skill skill in GameManager.Instance.playerStatus.skills)
-            {
-                skill.currentUseCount = skill.maxUseCount;
-            }
-
             PlayInnSe();
 
             if (messageText != null)
             {
                 messageText.text =
-                    $"{restCost}G払って休んだ。体力とスキルが回復した！";
+                    $"{restCost}G払って休んだ。体力が回復した！";
             }
         }
         else

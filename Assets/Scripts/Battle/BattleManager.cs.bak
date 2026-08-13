@@ -743,13 +743,14 @@ public class BattleManager : MonoBehaviour
         int damage = Mathf.Max(1, playerAttack - currentEnemy.defense);
         enemyHp -= damage;
 
-        // 通常攻撃では、腕力か素早さのどちらか一方が成長する。
-        StatusType growthType =
-            Random.value < 0.5f
-                ? StatusType.Strength
-                : StatusType.Speed;
-
-        AddGrowth(growthType, 1);
+        AddGrowth(
+                StatusType.Speed,
+                1
+            );
+        AddGrowth(
+                        StatusType.Strength,
+                        1
+                    );
 
 
         return new BattleActionResult(

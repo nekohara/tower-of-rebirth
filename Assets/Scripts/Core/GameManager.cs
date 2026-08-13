@@ -76,6 +76,11 @@ public class GameManager : MonoBehaviour
         dungeonPlayerGridPos = Vector2Int.zero;
         dungeonStartPosition = Vector2Int.zero;
         dungeonExploredTiles = null;
+        ownedWeapons.Clear();
+        ownedWeapons.Add(new Weapon("‚È‚µ", 0, 0));
+
+        ownedArmors.Clear();
+        ownedArmors.Add(new Armor("‚È‚µ", 0, 0));
     }
 
 

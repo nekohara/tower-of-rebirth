@@ -1,15 +1,9 @@
-ï»¿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
 using static TreasureBox;
 
 public class DungeonGenerator : MonoBehaviour
 {
-    private const int FloorTile = 0;
-    private const int WallTile = 1;
-    private const int ClosedTreasureTile = 2;
-    private const int ExitTile = 3;
-    private const int OpenedTreasureTile = 4;
-
     [SerializeField] private GameObject floorPrefab;
     [SerializeField] private GameObject wallPrefab;
     [SerializeField] private GameObject chestPrefab;
@@ -47,7 +41,7 @@ public class DungeonGenerator : MonoBehaviour
     {
         if (dungeonRoot == null)
         {
-            Debug.LogError("dungeonRoot ãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“");
+            Debug.LogError("dungeonRoot ‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñ");
             return;
         }
 
@@ -61,7 +55,7 @@ public class DungeonGenerator : MonoBehaviour
         {
             map = gm.currentDungeonMap;
 
-            // ä¿å­˜ã—ãŸãƒãƒƒãƒ—ã‚’ç”Ÿæˆã—ãŸã¨ãã®é–‹å§‹åœ°ç‚¹ã‚‚å¾©å…ƒã™ã‚‹
+            // •Û‘¶‚µ‚½ƒ}ƒbƒv‚ğ¶¬‚µ‚½‚Æ‚«‚ÌŠJn’n“_‚à•œŒ³‚·‚é
             startPosition = gm.dungeonStartPosition;
         }
         else
@@ -84,7 +78,7 @@ public class DungeonGenerator : MonoBehaviour
         map = new int[height, width];
         rooms.Clear();
 
-        // å…¨ãƒã‚¹ã‚’å£ã§åˆæœŸåŒ–
+        // ‘Sƒ}ƒX‚ğ•Ç‚Å‰Šú‰»
         for (int z = 0; z < height; z++)
         {
             for (int x = 0; x < width; x++)
@@ -109,7 +103,7 @@ public class DungeonGenerator : MonoBehaviour
             int roomHeight =
                 Random.Range(minRoomSize, maxRoomSize + 1);
 
-            // å¤–å‘¨1ãƒã‚¹ã‚’å£ã¨ã—ã¦æ®‹ã™
+            // ŠOü1ƒ}ƒX‚ğ•Ç‚Æ‚µ‚Äc‚·
             int roomX = Random.Range(1, width - roomWidth);
             int roomZ = Random.Range(1, height - roomHeight);
 
@@ -139,17 +133,17 @@ public class DungeonGenerator : MonoBehaviour
 
         if (rooms.Count == 0)
         {
-            Debug.LogError("éƒ¨å±‹ã‚’ç”Ÿæˆã§ãã¾ã›ã‚“ã§ã—ãŸ");
+            Debug.LogError("•”‰®‚ğ¶¬‚Å‚«‚Ü‚¹‚ñ‚Å‚µ‚½");
             return;
         }
 
         if (rooms.Count < minRoomCount)
         {
             Debug.LogWarning(
-                $"éƒ¨å±‹æ•°ãŒä¸è¶³ã—ã¦ã„ã¾ã™: {rooms.Count}éƒ¨å±‹");
+                $"•”‰®”‚ª•s‘«‚µ‚Ä‚¢‚Ü‚·: {rooms.Count}•”‰®");
         }
 
-        // æœ€åˆã®éƒ¨å±‹ã®ä¸­å¤®ã‚’é–‹å§‹åœ°ç‚¹ã«ã™ã‚‹
+        // Å‰‚Ì•”‰®‚Ì’†‰›‚ğŠJn’n“_‚É‚·‚é
         startPosition = GetRoomCenter(rooms[0]);
         map[startPosition.y, startPosition.x] = 0;
 
@@ -157,14 +151,14 @@ public class DungeonGenerator : MonoBehaviour
         PlaceTreasureBoxes();
 
         Debug.Log(
-            $"ãƒ€ãƒ³ã‚¸ãƒ§ãƒ³ã‚’ç”Ÿæˆã—ã¾ã—ãŸ: {rooms.Count}éƒ¨å±‹");
+            $"ƒ_ƒ“ƒWƒ‡ƒ“‚ğ¶¬‚µ‚Ü‚µ‚½: {rooms.Count}•”‰®");
     }
 
     private bool DoesRoomOverlap(RectInt newRoom)
     {
         foreach (RectInt room in rooms)
         {
-            // éƒ¨å±‹åŒå£«ã®é–“ã«å£1ãƒã‚¹åˆ†ã®ä½™ç™½ã‚’ç¢ºä¿
+            // •”‰®“¯m‚ÌŠÔ‚É•Ç1ƒ}ƒX•ª‚Ì—]”’‚ğŠm•Û
             RectInt expandedRoom = new RectInt(
                 room.xMin - 1,
                 room.yMin - 1,
@@ -202,7 +196,7 @@ public class DungeonGenerator : MonoBehaviour
         Vector2Int first,
         Vector2Int second)
     {
-        // æ¥ç¶šæ–¹å‘ã‚’ãƒ©ãƒ³ãƒ€ãƒ ã«å¤‰ãˆã¦å˜èª¿ã•ã‚’æŠ‘ãˆã‚‹
+        // Ú‘±•ûŒü‚ğƒ‰ƒ“ƒ_ƒ€‚É•Ï‚¦‚Ä’P’²‚³‚ğ—}‚¦‚é
         if (Random.value < 0.5f)
         {
             CarveHorizontalCorridor(
@@ -262,7 +256,7 @@ public class DungeonGenerator : MonoBehaviour
 
         var candidates = new List<Vector2Int>();
 
-        // é–‹å§‹éƒ¨å±‹ã‚’é™¤å¤–
+        // ŠJn•”‰®‚ğœŠO
         for (int roomIndex = 1; roomIndex < rooms.Count; roomIndex++)
         {
             RectInt room = rooms[roomIndex];
@@ -277,9 +271,8 @@ public class DungeonGenerator : MonoBehaviour
 
             foreach (Vector2Int position in corners)
             {
-                // å‡ºå£ãªã©ãŒé…ç½®ã•ã‚Œã¦ã„ã‚‹ãƒã‚¹ã¯é™¤å¤–
-                if (map[position.y, position.x] != FloorTile ||
-                    position == startPosition)
+                // oŒû‚È‚Ç‚ª”z’u‚³‚ê‚Ä‚¢‚éƒ}ƒX‚ÍœŠO
+                if (map[position.y, position.x] != 0)
                 {
                     continue;
                 }
@@ -297,25 +290,17 @@ public class DungeonGenerator : MonoBehaviour
 
             candidates.RemoveAt(index);
 
-            // å®ç®±ã‚’ç½®ã„ãŸã“ã¨ã§é€šè·¯ã‚„éƒ¨å±‹ãŒåˆ†æ–­ã•ã‚Œã‚‹å€™è£œã¯ä½¿ã‚ãªã„ã€‚
-            map[position.y, position.x] = ClosedTreasureTile;
-
-            if (!AreAllWalkableTilesReachable())
-            {
-                map[position.y, position.x] = FloorTile;
-                continue;
-            }
-
+            map[position.y, position.x] = 2;
             placed++;
 
-            // åŒã˜éƒ¨å±‹ã¸è¤‡æ•°é…ç½®ã•ã‚Œã‚‹ã®ã‚’é˜²ããªã‚‰ã€
-            // ã“ã“ã§åŒä¸€éƒ¨å±‹ã®å€™è£œã‚’å‰Šé™¤ã—ã¦ã‚‚ã‚ˆã„
+            // “¯‚¶•”‰®‚Ö•¡””z’u‚³‚ê‚é‚Ì‚ğ–h‚®‚È‚çA
+            // ‚±‚±‚Å“¯ˆê•”‰®‚ÌŒó•â‚ğíœ‚µ‚Ä‚à‚æ‚¢
         }
 
         if (placed < treasureCount)
         {
             Debug.LogWarning(
-                $"å®ç®±ã‚’{treasureCount}å€‹ä¸­{placed}å€‹ã—ã‹é…ç½®ã§ãã¾ã›ã‚“ã§ã—ãŸã€‚");
+                $"•ó” ‚ğ{treasureCount}ŒÂ’†{placed}ŒÂ‚µ‚©”z’u‚Å‚«‚Ü‚¹‚ñ‚Å‚µ‚½B");
         }
     }
 
@@ -332,10 +317,9 @@ public class DungeonGenerator : MonoBehaviour
             {
                 int tileType = map[z, x];
 
-                if (tileType != FloorTile &&
-                    tileType != ClosedTreasureTile &&
-                    tileType != ExitTile &&
-                    tileType != OpenedTreasureTile)
+                if (tileType != 0 &&
+                    tileType != 2 &&
+                    tileType != 3)
                 {
                     continue;
                 }
@@ -354,15 +338,11 @@ public class DungeonGenerator : MonoBehaviour
                 CreateWallIfNeeded(x, z, -1, 0, basePos, Vector3.left);
                 CreateWallIfNeeded(x, z, 1, 0, basePos, Vector3.right);
 
-                if (tileType == ClosedTreasureTile ||
-                    tileType == OpenedTreasureTile)
+                if (tileType == 2)
                 {
-                    CreateTreasureBox(
-                        basePos,
-                        new Vector2Int(x, z),
-                        tileType == OpenedTreasureTile);
+                    CreateTreasureBox(basePos, new Vector2Int(x, z));
                 }
-                else if (tileType == ExitTile)
+                else if (tileType == 3)
                 {
                     Vector3 position = basePos + Vector3.up * 0.5f;
                     Quaternion rotation = GetExitRotation(x, z);
@@ -377,24 +357,24 @@ public class DungeonGenerator : MonoBehaviour
 
     private Quaternion GetExitRotation(int x, int z)
     {
-        // å‡ºå£Prefabã®æ­£é¢ãŒãƒ­ãƒ¼ã‚«ãƒ«+Zæ–¹å‘ã§ã‚ã‚‹å‰æ
+        // oŒûPrefab‚Ì³–Ê‚ªƒ[ƒJƒ‹+Z•ûŒü‚Å‚ ‚é‘O’ñ
 
-        if (IsWall(x, z + 1)) // åŒ—å´ãŒå£
+        if (IsWall(x, z + 1)) // –k‘¤‚ª•Ç
         {
             return Quaternion.Euler(0f, 0f, 0f);
         }
 
-        if (IsWall(x, z - 1)) // å—å´ãŒå£
+        if (IsWall(x, z - 1)) // “ì‘¤‚ª•Ç
         {
             return Quaternion.Euler(0f, 180f, 0f);
         }
 
-        if (IsWall(x + 1, z)) // æ±å´ãŒå£
+        if (IsWall(x + 1, z)) // “Œ‘¤‚ª•Ç
         {
             return Quaternion.Euler(0f, -90f, 0f);
         }
 
-        if (IsWall(x - 1, z)) // è¥¿å´ãŒå£
+        if (IsWall(x - 1, z)) // ¼‘¤‚ª•Ç
         {
             return Quaternion.Euler(0f, 90f, 0f);
         }
@@ -404,8 +384,7 @@ public class DungeonGenerator : MonoBehaviour
 
     private void CreateTreasureBox(
         Vector3 basePos,
-        Vector2Int gridPosition,
-        bool isOpened)
+        Vector2Int gridPosition)
     {
         Quaternion rotation =
     GetTreasureRotation(gridPosition) *
@@ -422,11 +401,9 @@ public class DungeonGenerator : MonoBehaviour
         if (box == null)
         {
             Debug.LogError(
-                "å®ç®±Prefabã«TreasureBoxãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚");
+                "•ó” Prefab‚ÉTreasureBox‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB");
             return;
         }
-
-        box.Initialize(this, gridPosition, isOpened);
 
         int rand = Random.Range(0, 100);
 
@@ -479,7 +456,7 @@ public class DungeonGenerator : MonoBehaviour
             return true;
         }
 
-        return map[z, x] == WallTile;
+        return map[z, x] == 1;
     }
 
     private void ClearDungeon()
@@ -501,7 +478,7 @@ public class DungeonGenerator : MonoBehaviour
         {
             return false;
         }
-        return map[z, x] == FloorTile || map[z, x] == ExitTile;
+        return map[z, x] == 0 || map[z, x] == 3;
     }
 
     public Vector3 GetWorldPosition(int x, int z)
@@ -540,8 +517,6 @@ public class DungeonGenerator : MonoBehaviour
 
         Vector2Int farthestPosition = startPosition;
         int farthestDistance = -1;
-        Vector2Int fallbackPosition = startPosition;
-        int fallbackDistance = 0;
 
         Vector2Int[] directions =
         {
@@ -555,15 +530,7 @@ public class DungeonGenerator : MonoBehaviour
         {
             var current = queue.Dequeue();
 
-            // é€šå¸¸æ¡ä»¶ã«åˆã†ãƒã‚¹ãŒãªãã¦ã‚‚ã€åˆ°é”å¯èƒ½ãªæœ€é ãƒã‚¹ã‚’
-            // éšæ®µã®é…ç½®å…ˆã¨ã—ã¦ç¢ºä¿ã—ã¦ãŠãã€‚
-            if (current.distance > fallbackDistance)
-            {
-                fallbackDistance = current.distance;
-                fallbackPosition = current.position;
-            }
-
-            // BFSã®æ¢ç´¢ã¨ã¯åˆ†ã‘ã¦ã€å‡ºå£å€™è£œã ã‘ã‚’çµã‚Šè¾¼ã‚€
+            // BFS‚Ì’Tõ‚Æ‚Í•ª‚¯‚ÄAoŒûŒó•â‚¾‚¯‚ği‚è‚Ş
             bool isExitCandidate =
                 IsInsideRoom(current.position) &&
                 !rooms[0].Contains(current.position) &&
@@ -578,7 +545,7 @@ public class DungeonGenerator : MonoBehaviour
                 farthestPosition = current.position;
             }
 
-            // é€šè·¯ã‚’å«ã‚€ã€ã™ã¹ã¦ã®åºŠã‚’æ¢ç´¢ã™ã‚‹
+            // ’Ê˜H‚ğŠÜ‚ŞA‚·‚×‚Ä‚Ì°‚ğ’Tõ‚·‚é
             foreach (Vector2Int direction in directions)
             {
                 Vector2Int next = current.position + direction;
@@ -594,7 +561,7 @@ public class DungeonGenerator : MonoBehaviour
                     continue;
                 }
 
-                if (map[next.y, next.x] != FloorTile)
+                if (map[next.y, next.x] != 0)
                 {
                     continue;
                 }
@@ -606,17 +573,14 @@ public class DungeonGenerator : MonoBehaviour
 
         if (farthestDistance < 0)
         {
-            farthestPosition = fallbackPosition;
-            farthestDistance = fallbackDistance;
-
-            Debug.LogWarning(
-                "é€šå¸¸æ¡ä»¶ã‚’æº€ãŸã™éšæ®µå€™è£œãŒãªã„ãŸã‚ã€åˆ°é”å¯èƒ½ãªæœ€é ãƒã‚¹ã¸é…ç½®ã—ã¾ã™ã€‚");
+            Debug.LogError("oŒû‚ğ”z’u‚Å‚«‚é•”‰®“à‚Ì•ÇÛ‚ª‚ ‚è‚Ü‚¹‚ñ");
+            return;
         }
 
-        map[farthestPosition.y, farthestPosition.x] = ExitTile;
+        map[farthestPosition.y, farthestPosition.x] = 3;
 
         Debug.Log(
-            $"å‡ºå£ã‚’é…ç½®ã—ã¾ã—ãŸ: {farthestPosition}, è·é›¢: {farthestDistance}");
+            $"oŒû‚ğ”z’u‚µ‚Ü‚µ‚½: {farthestPosition}, ‹——£: {farthestDistance}");
     }
 
 
@@ -639,7 +603,7 @@ public class DungeonGenerator : MonoBehaviour
                 continue;
             }
 
-            // é€šå¸¸åºŠã¾ãŸã¯å‡ºå£ã®æ–¹å‘ã‚’å‘ã
+            // ’Êí°‚Ü‚½‚ÍoŒû‚Ì•ûŒü‚ğŒü‚­
             int tileType = map[frontPosition.y, frontPosition.x];
 
             if (tileType == 0 || tileType == 3)
@@ -686,72 +650,6 @@ public class DungeonGenerator : MonoBehaviour
         }
 
         return false;
-    }
-
-    private bool AreAllWalkableTilesReachable()
-    {
-        if (!IsPathTile(startPosition))
-        {
-            return false;
-        }
-
-        int mapWidth = map.GetLength(1);
-        int mapHeight = map.GetLength(0);
-        int walkableTileCount = 0;
-
-        for (int z = 0; z < mapHeight; z++)
-        {
-            for (int x = 0; x < mapWidth; x++)
-            {
-                if (IsPathTile(new Vector2Int(x, z)))
-                {
-                    walkableTileCount++;
-                }
-            }
-        }
-
-        var visited = new bool[mapHeight, mapWidth];
-        var queue = new Queue<Vector2Int>();
-        queue.Enqueue(startPosition);
-        visited[startPosition.y, startPosition.x] = true;
-
-        int reachedTileCount = 0;
-        Vector2Int[] directions =
-        {
-            Vector2Int.up,
-            Vector2Int.down,
-            Vector2Int.left,
-            Vector2Int.right
-        };
-
-        while (queue.Count > 0)
-        {
-            Vector2Int current = queue.Dequeue();
-            reachedTileCount++;
-
-            foreach (Vector2Int direction in directions)
-            {
-                Vector2Int next = current + direction;
-
-                if (!IsInsideMap(next) ||
-                    visited[next.y, next.x] ||
-                    !IsPathTile(next))
-                {
-                    continue;
-                }
-
-                visited[next.y, next.x] = true;
-                queue.Enqueue(next);
-            }
-        }
-
-        return reachedTileCount == walkableTileCount;
-    }
-
-    private bool IsPathTile(Vector2Int position)
-    {
-        int tileType = map[position.y, position.x];
-        return tileType == FloorTile || tileType == ExitTile;
     }
 
 

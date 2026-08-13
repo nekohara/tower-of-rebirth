@@ -30,7 +30,6 @@ public class PlayerMover : MonoBehaviour
     int stepsWithoutEncounter = 3;
 
     private bool isFloorTransitioning;
-    private bool isEncounterTransitioning;
 
     private string[] dungeonMessages =
 {
@@ -90,12 +89,6 @@ public class PlayerMover : MonoBehaviour
 
     private void Update()
     {
-        // 戦闘画面へのフェード中は移動・旋回・調べる操作を受け付けない。
-        if (isEncounterTransitioning)
-        {
-            return;
-        }
-
         if (isMoving)
         {
             MoveToTarget();
@@ -350,10 +343,6 @@ private void TryMove(Vector3 direction)
 
     private void CheckEncounter()
     {
-        if (isEncounterTransitioning)
-        {
-            return;
-        }
 
 #if UNITY_EDITOR
         if (disableEncounterForDebug)
@@ -460,14 +449,6 @@ private void TryMove(Vector3 direction)
 
     private IEnumerator EncounterRoutine()
     {
-        if (isEncounterTransitioning)
-        {
-            yield break;
-        }
-
-        // 最初のyieldより前にロックし、次フレームから入力を停止する。
-        isEncounterTransitioning = true;
-
         Debug.Log("敵と遭遇！");
 
         var gm = GameManager.Instance;

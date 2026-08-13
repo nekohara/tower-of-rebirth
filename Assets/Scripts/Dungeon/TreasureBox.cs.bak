@@ -16,9 +16,6 @@ public class TreasureBox : MonoBehaviour
 
     [SerializeField] private TreasureType treasureType;
 
-    private DungeonGenerator dungeonGenerator;
-    private Vector2Int gridPosition;
-
     [SerializeField] private GameObject closedModel;
     [SerializeField] private GameObject openedModel;
 
@@ -55,26 +52,6 @@ public class TreasureBox : MonoBehaviour
         treasureType = type;
     }
 
-    public void Initialize(
-        DungeonGenerator generator,
-        Vector2Int position,
-        bool opened)
-    {
-        dungeonGenerator = generator;
-        gridPosition = position;
-        isOpened = opened;
-
-        if (closedModel != null)
-        {
-            closedModel.SetActive(!opened);
-        }
-
-        if (openedModel != null)
-        {
-            openedModel.SetActive(opened);
-        }
-    }
-
     IEnumerator OpenRoutine()
     {
         if (isOpened)
@@ -83,15 +60,6 @@ public class TreasureBox : MonoBehaviour
         }
 
         isOpened = true;
-
-        // シーンを移動して宝箱が再生成されても、開封済みとして復元する。
-        if (dungeonGenerator != null)
-        {
-            dungeonGenerator.SetTileType(
-                gridPosition.x,
-                gridPosition.y,
-                4);
-        }
 
         PlayOpenTreasureSe();
 
