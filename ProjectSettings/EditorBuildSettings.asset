@@ -6,34 +6,34 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 0
-    path: Assets/Scenes/SampleScene.unity
+    path: Assets/_Project/Scenes/SampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
   - enabled: 1
-    path: Assets/Scenes/Title.unity
+    path: Assets/_Project/Scenes/Title.unity
     guid: 194a470686f912046bd08b985d40bec3
   - enabled: 1
-    path: Assets/Scenes/Prologue.unity
+    path: Assets/_Project/Scenes/Prologue.unity
     guid: e124b89f5babca341aed897b4a610d08
   - enabled: 1
-    path: Assets/Scenes/PlayerCreation.unity
+    path: Assets/_Project/Scenes/PlayerCreation.unity
     guid: 1bdb6d5ee9334044f94374fc702d628f
   - enabled: 1
-    path: Assets/Scenes/Dungeon.unity
+    path: Assets/_Project/Scenes/Dungeon.unity
     guid: f8c11e0de1b693047a5e9d0c608067cd
   - enabled: 1
-    path: Assets/Scenes/Town.unity
+    path: Assets/_Project/Scenes/Town.unity
     guid: d419648b73da7854292569e5bb4ef7c7
   - enabled: 1
-    path: Assets/Scenes/Battle.unity
+    path: Assets/_Project/Scenes/Battle.unity
     guid: 9e2fcfb9273983048871f510c11ae161
   - enabled: 1
-    path: Assets/Scenes/GameOver.unity
+    path: Assets/_Project/Scenes/GameOver.unity
     guid: eec72b5bc8ddfd34eacd7db20dcaedd7
   - enabled: 1
-    path: Assets/Scenes/ToBeContinued.unity
+    path: Assets/_Project/Scenes/ToBeContinued.unity
     guid: 438086fb8697ef84bbd817c38c24443c
   - enabled: 1
-    path: Assets/Scenes/Status.unity
+    path: Assets/_Project/Scenes/Status.unity
     guid: 70fdea3842dee6b4cae43080c7b3a260
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
