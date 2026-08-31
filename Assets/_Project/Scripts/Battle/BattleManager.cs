@@ -515,8 +515,14 @@ public class BattleManager : MonoBehaviour
 
                 BattleActionResult actionResult =  ExecutePlayerAction(action);
 
-                if (actionResult.damage > 0 &&  effectController != null)
+                if (actionResult.damage > 0 &&
+                     effectController != null)
                 {
+                    if (action.command == BattleCommand.Attack)
+                    {
+                        yield return effectController.PlaySlashEffect();
+                    }
+
                     yield return effectController.PlayEnemyDamage(
                         currentEnemyObject,
                         actionResult.damage
