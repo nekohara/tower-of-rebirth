@@ -76,6 +76,40 @@ public class BattleEffectController : MonoBehaviour
     [SerializeField]
     private AudioClip enemyDefeatSe;
 
+    [Header("通常攻撃エフェクト")]
+    [SerializeField]
+    private GameObject slashEffectPrefab;
+
+    [SerializeField]
+    private Transform enemyEffectSpawnPoint;
+
+    [SerializeField]
+    private float slashHitDelay = 0.1f;
+
+    [SerializeField]
+    private float slashEffectLifetime = 1.0f;
+
+
+    public IEnumerator PlaySlashEffect()
+    {
+        if (slashEffectPrefab == null ||
+            enemyEffectSpawnPoint == null)
+        {
+            yield break;
+        }
+
+        GameObject effectObject = Instantiate(
+            slashEffectPrefab,
+            enemyEffectSpawnPoint
+        );
+
+        effectObject.transform.localPosition = Vector3.zero;
+
+        Destroy(effectObject, slashEffectLifetime);
+
+        yield return new WaitForSeconds(slashHitDelay);
+    }
+
     public IEnumerator PlayEnemyDamage(
         GameObject enemyObject,
         int damage)
